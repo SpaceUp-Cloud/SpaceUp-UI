@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_clean_architecture/flutter_clean_architecture.dart';
+import 'package:spaceup_ui/domain_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -8,8 +10,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    FlutterCleanArchitecture.debugModeOn();
+
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'SpaceUp Client',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -22,7 +26,27 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.teal,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              tabs: [
+                Tab(icon: Icon(Icons.settings_applications_outlined), text: 'System'),
+                Tab(icon: Icon(Icons.cloud), text: 'Domains'),
+                Tab(icon: Icon(Icons.miscellaneous_services_sharp), text: 'Services')
+              ],
+            ), title: Text('SpaceUp Client')
+          ),
+          body: TabBarView(
+            children: [
+              DomainPageStarter(),
+              DomainPageStarter(),
+              DomainPageStarter(),
+            ],
+          ),
+        )
+      )
     );
   }
 }
