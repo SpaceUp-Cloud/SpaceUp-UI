@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_clean_architecture/flutter_clean_architecture.dart';
 import 'package:spaceup_ui/domain_page.dart';
 
 void main() {
@@ -10,7 +9,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    FlutterCleanArchitecture.debugModeOn();
 
     return MaterialApp(
       title: 'SpaceUp Client',

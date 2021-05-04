@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:frefresh/frefresh.dart';
+import 'package:fsuper/fsuper.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 
@@ -14,8 +17,9 @@ class DomainPageStarter extends StatefulWidget {
 
 class DomainPage extends State<DomainPageStarter> {
   late Future<List<Domain>> domains;
-  ScrollController scrollController = ScrollController();
   bool fabIsVisible = true;
+
+  ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
@@ -24,8 +28,8 @@ class DomainPage extends State<DomainPageStarter> {
 
     scrollController.addListener(() {
       setState(() {
-        fabIsVisible =
-            scrollController.position.userScrollDirection == ScrollDirection.forward;
+        fabIsVisible = scrollController.position.userScrollDirection ==
+            ScrollDirection.forward;
       });
     });
   }
@@ -36,32 +40,28 @@ class DomainPage extends State<DomainPageStarter> {
       onPressed: _addDomain,
       tooltip: "Add domain",
       child: Icon(Icons.add),
-
     );
 
-    // createDomainCards(),
-
-    return Scaffold(
+    final scaffold = Scaffold(
       floatingActionButton: AnimatedOpacity(
         duration: Duration(milliseconds: 200),
         opacity: fabIsVisible ? 1 : 0,
         child: addDomainsWidget,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       body: SingleChildScrollView(
         controller: scrollController,
         child: createDomainCards(),
       ),
     );
 
-    /*return SingleChildScrollView(
-      child: Row(
-        children: [
+    return RefreshIndicator(child: scaffold, onRefresh: _onRefresh);
+  }
 
-
-        ],
-      ),
-    );*/
+  Future<void> _onRefresh() async {
+    setState(() {
+      domains = getDomains();
+    });
   }
 
   void _addDomain() {
@@ -91,7 +91,7 @@ class DomainPage extends State<DomainPageStarter> {
                 ),
                 const SizedBox(width: 8),
               ],
-            )
+            ),
           ]));
       cards.add(card);
     });
@@ -117,24 +117,28 @@ class DomainPage extends State<DomainPageStarter> {
           );
         });
   }
-}
 
-Future<List<Domain>> getDomains() async {
-  var domains = <Domain>[];
-  final httpClient = http.Client();
-  final client = RetryClient(httpClient);
+  Future<List<Domain>> getDomains() async {
+    var domains = <Domain>[];
+    final httpClient = http.Client();
+    final client = RetryClient(httpClient);
 
-  try {
-    //await client.get(Uri.parse('http://192.168.178.24:9090/api/domain/list?cached=true'));
-    var response = await http
-        .get(Uri.tryParse('${URL.BASE_URL}/domain/list?cached=true')!);
-    if (response.statusCode == 200) {
-      domains = parseDomains(response.body);
+    try {
+      var response = await client.get(
+          Uri.tryParse('${URL.BASE_URL}/domain/list?cached=true')!);
+      if (response.statusCode == 200) {
+        domains = parseDomains(response.body);
+      }
+    } finally {
+      client.close();
     }
-  } finally {
-    client.close();
+    return domains;
   }
-  return domains;
+
+  List<Domain> parseDomains(String body) {
+    final parsed = json.decode(body).cast<Map<String, dynamic>>();
+    return parsed.map<Domain>((json) => Domain.fromJson(json)).toList();
+  }
 }
 
 class Domain {
@@ -147,11 +151,6 @@ class Domain {
 
 Domain _domainFromJson(Map<String, dynamic> json) {
   return Domain(url: json["url"] as String);
-}
-
-List<Domain> parseDomains(String body) {
-  final parsed = json.decode(body).cast<Map<String, dynamic>>();
-  return parsed.map<Domain>((json) => Domain.fromJson(json)).toList();
 }
 
 class URL {
