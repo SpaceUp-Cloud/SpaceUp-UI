@@ -3,8 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:frefresh/frefresh.dart';
-import 'package:fsuper/fsuper.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 

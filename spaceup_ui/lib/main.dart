@@ -38,9 +38,9 @@ class MyApp extends StatelessWidget {
           ),
           body: TabBarView(
             children: [
+              MyHomePage(title: "Demo",),
               DomainPageStarter(),
-              DomainPageStarter(),
-              DomainPageStarter(),
+              MyHomePage(title: "Demo",),
             ],
           ),
         )
