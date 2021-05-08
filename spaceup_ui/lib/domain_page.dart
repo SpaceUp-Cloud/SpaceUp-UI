@@ -14,15 +14,18 @@ class DomainPageStarter extends StatefulWidget {
 }
 
 class DomainPage extends State<DomainPageStarter> {
-  late Future<List<Domain>> domains;
-  bool fabIsVisible = true;
-
   ScrollController scrollController = ScrollController();
+  var refreshKey = GlobalKey<RefreshIndicatorState>();
+
+  late Future<List<Domain>> domains;
+  bool isCached = false;
+
+  bool fabIsVisible = true;
 
   @override
   void initState() {
     super.initState();
-    domains = getDomains();
+    domains = _getDomains(isCached);
 
     scrollController.addListener(() {
       setState(() {
@@ -35,9 +38,15 @@ class DomainPage extends State<DomainPageStarter> {
   @override
   Widget build(BuildContext context) {
     final addDomainsWidget = FloatingActionButton(
-      onPressed: _addDomain,
+      onPressed: () => _addDomainDialog(),
       tooltip: "Add domain",
       child: Icon(Icons.add),
+    );
+
+    final scrollCardsView = SingleChildScrollView(
+      physics: AlwaysScrollableScrollPhysics(),
+      controller: scrollController,
+      child: createDomainCards(),
     );
 
     final scaffold = Scaffold(
@@ -47,24 +56,20 @@ class DomainPage extends State<DomainPageStarter> {
         child: addDomainsWidget,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      body: SingleChildScrollView(
-        controller: scrollController,
-        child: createDomainCards(),
+      body: Stack(
+        children: [
+          RefreshIndicator(child: scrollCardsView, onRefresh: _onRefresh, key: refreshKey)
+        ],
       ),
     );
 
-    return RefreshIndicator(child: scaffold, onRefresh: _onRefresh);
+    return scaffold;
   }
 
   Future<void> _onRefresh() async {
     setState(() {
-      domains = getDomains();
+      domains = _getDomains(false);
     });
-  }
-
-  void _addDomain() {
-    final snackbar = SnackBar(content: Text('TODO: Add domain'));
-    ScaffoldMessenger.of(context).showSnackBar(snackbar);
   }
 
   List<Card> createCards(List<Domain> domains) {
@@ -74,23 +79,23 @@ class DomainPage extends State<DomainPageStarter> {
     domains.forEach((domain) {
       var card = Card(
           child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.cloud),
-              title: Text(domain.url),
+        ListTile(
+          leading: Icon(Icons.cloud),
+          title: Text(domain.url),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                _deleteDomainDialog(domain);
+              },
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                TextButton(
-                  child: const Text('Delete'),
-                  onPressed: () {
-                    /* ... */
-                  },
-                ),
-                const SizedBox(width: 8),
-              ],
-            ),
-          ]));
+            const SizedBox(width: 4),
+          ],
+        ),
+      ]));
       cards.add(card);
     });
 
@@ -100,7 +105,7 @@ class DomainPage extends State<DomainPageStarter> {
   FutureBuilder<List<Domain>> createDomainCards() {
     return FutureBuilder<List<Domain>>(
         future: domains,
-        builder: (context, snapshot) {
+        builder: (context, AsyncSnapshot<List<Domain>> snapshot) {
           if (snapshot.hasData &&
               snapshot.data != null &&
               snapshot.data!.isNotEmpty) {
@@ -116,16 +121,123 @@ class DomainPage extends State<DomainPageStarter> {
         });
   }
 
-  Future<List<Domain>> getDomains() async {
+  Future<void> _deleteDomainDialog(Domain domain) async {
+    return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Warning!"),
+            content: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Text("Are you sure you want to delete: ${domain.url}?")
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                  child: Text('Confirm'),
+                  onPressed: () {
+                    _deleteDomain(domain);
+                    Navigator.of(context).pop();
+                  }),
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  Future<void> _addDomainDialog() async {
+    TextEditingController _textFieldController = TextEditingController();
+
+    return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Add Domains!"),
+            content: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    controller: _textFieldController,
+                    textInputAction: TextInputAction.go,
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      hintText: "Add here... x.y.z; a.b.c; ..."
+                    ),
+                  )
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                  child: Text('Submit'),
+                  onPressed: () {
+                    _addDomain(_textFieldController.value.text);
+                    Navigator.of(context).pop();
+                  }),
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  Future<void> _deleteDomain(Domain domain) async {
+    final httpClient = http.Client();
+    final client = RetryClient(httpClient);
+
+    try {
+      var uri = Uri.parse('${URL.BASE_URL}/domain/delete/${domain.url}');
+      var response = await client.delete(uri);
+      // TODO: handle feedback
+    } finally {
+      client.close();
+    }
+  }
+  
+  Future<void> _addDomain(String domain) async {
+    final httpClient = http.Client();
+    final client = RetryClient(httpClient);
+
+    List<dynamic> domains = <dynamic>[];
+    domain.split(";").forEach((element) {
+      var map = Map<String, String>();
+      map["url"] = element;
+      domains.add(map);
+    });
+
+    try {
+      var uri = Uri.parse('${URL.BASE_URL}/domain/add');
+      var response = await client.post(
+          uri,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(domains));
+      // TODO: handle feedback
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<List<Domain>> _getDomains(bool isCached) async {
     var domains = <Domain>[];
     final httpClient = http.Client();
     final client = RetryClient(httpClient);
 
     try {
-      var response = await client.get(
-          Uri.tryParse('${URL.BASE_URL}/domain/list?cached=true')!);
+      var response = await client
+          .get(Uri.tryParse('${URL.BASE_URL}/domain/list?cached=$isCached')!);
       if (response.statusCode == 200) {
-        domains = parseDomains(response.body);
+        domains = _parseDomains(response.body);
       }
     } finally {
       client.close();
@@ -133,7 +245,7 @@ class DomainPage extends State<DomainPageStarter> {
     return domains;
   }
 
-  List<Domain> parseDomains(String body) {
+  List<Domain> _parseDomains(String body) {
     final parsed = json.decode(body).cast<Map<String, dynamic>>();
     return parsed.map<Domain>((json) => Domain.fromJson(json)).toList();
   }
