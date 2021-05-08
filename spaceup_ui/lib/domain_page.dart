@@ -50,6 +50,9 @@ class DomainPage extends State<DomainPageStarter> {
     );
 
     final scaffold = Scaffold(
+      appBar: AppBar(
+        title: Text("Domains"),
+      ),
       floatingActionButton: AnimatedOpacity(
         duration: Duration(milliseconds: 200),
         opacity: fabIsVisible ? 1 : 0,
