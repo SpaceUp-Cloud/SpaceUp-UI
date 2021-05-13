@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import 'package:page_transition/page_transition.dart';
 import 'package:spaceup_ui/domain_page.dart';
+import 'package:spaceup_ui/settings_page.dart';
 import 'package:spaceup_ui/ui_data.dart';
 
 void main() {
@@ -10,23 +11,24 @@ void main() {
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+  MyApp() : super();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SpaceUp Client',
       theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
+          brightness: Brightness.light,
           primaryColor: Colors.teal,
           primarySwatch: Colors.deepOrange),
-      home: MyHomePage(title: "Home"),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: Colors.teal.shade800,
+        accentColor: Colors.teal.shade600,
+        primaryColorDark: Colors.white,
+        primarySwatch: Colors.teal,
+      ),
+      home: MyHomePage("Home"),
       initialRoute: null,
       onGenerateRoute: (RouteSettings settings) {
         switch (settings.name) {
@@ -36,10 +38,17 @@ class MyApp extends StatelessWidget {
                   child: DomainPageStarter(),
                   type: PageTransitionType.leftToRight);
             }
+          case '/settings':
+            {
+              return PageTransition(
+                  child: SettingsPageStarter(),
+                  type: PageTransitionType.leftToRight);
+            }
           default:
             {
               return PageTransition(
-                  child: MyHomePage(), type: PageTransitionType.leftToRight);
+                  child: MyHomePage("Home"),
+                  type: PageTransitionType.leftToRight);
             }
         }
       },
@@ -48,7 +57,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, this.title}) : super(key: key);
+  MyHomePage(this.title) : super();
 
   final String? title;
 
@@ -57,16 +66,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
+  // Depending on platform the home widget shows x cards per column
   late int maxElementsPerLine;
 
   @override
   void initState() {
     super.initState();
 
-    if(Platform.isWindows ||Platform.isLinux) {
+    if (Platform.isWindows || Platform.isLinux) {
       maxElementsPerLine = 8;
-    } else if(Platform.isAndroid || Platform.isIOS) {
+    } else if (Platform.isAndroid || Platform.isIOS) {
       maxElementsPerLine = 2;
     } else {
       maxElementsPerLine = 2;
@@ -87,6 +96,29 @@ class _MyHomePageState extends State<MyHomePage> {
           // the App.build method, and use it to set our appbar title.
           title: Text(widget.title!),
         ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                  // TODO: Display SpaceUp Icon
+                  decoration: BoxDecoration(color: Colors.teal),
+                  child: Text('Menu')),
+              ListTile(
+                title: Text('Settings'),
+                onTap: () {
+                  Navigator.pushNamed(context, UIData.settingsRoute);
+                },
+              ),
+              ListTile(
+                title: Text('About'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        ),
         body: Center(
             // Center is a layout widget. It takes a single child and positions it
             // in the middle of the parent.
@@ -95,20 +127,15 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisCount: maxElementsPerLine,
             scrollDirection: Axis.vertical,
             children: [
-              _createCard("Domains", UIData.domainsRoute, Colors.teal, Colors.white),
-              _createCard("Domains", UIData.domainsRoute, Colors.teal, Colors.white),
-              _createCard("Domains", UIData.domainsRoute, Colors.teal, Colors.white),
-              _createCard("Domains", UIData.domainsRoute, Colors.teal, Colors.white)
+              _createCard(
+                  "Domains", UIData.domainsRoute, Colors.teal, Colors.white),
             ],
           ),
         )));
   }
 
   InkWell _createCard(
-      String cardTitle,
-      String path,
-      MaterialColor bgColor,
-      Color fontColor) {
+      String cardTitle, String path, MaterialColor bgColor, Color fontColor) {
     return InkWell(
         onTap: () {
           Navigator.pushNamed(context, path);
@@ -126,12 +153,9 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Text(
               cardTitle,
               style: TextStyle(
-                  color: fontColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
+                  color: fontColor, fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
-        )
-    );
+        ));
   }
 }

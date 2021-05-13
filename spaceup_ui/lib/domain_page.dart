@@ -200,9 +200,12 @@ class DomainPage extends State<DomainPageStarter> {
     final client = RetryClient(httpClient);
 
     try {
-      var uri = Uri.parse('${URL.BASE_URL}/domain/delete/${domain.url}');
-      var response = await client.delete(uri);
-      // TODO: handle feedback
+      var uri = Uri.tryParse('${URL.BASE_URL}/domain/delete/${domain.url}');
+      var response = await client.delete(uri!);
+
+      if(response.body.isNotEmpty && response.statusCode == 200) {
+        _showFeedback(response.body);
+      }
     } finally {
       client.close();
     }
@@ -220,12 +223,15 @@ class DomainPage extends State<DomainPageStarter> {
     });
 
     try {
-      var uri = Uri.parse('${URL.BASE_URL}/domain/add');
+      var uri = Uri.tryParse('${URL.BASE_URL}/domain/add');
       var response = await client.post(
-          uri,
+          uri!,
           headers: {"Content-Type": "application/json"},
           body: json.encode(domains));
-      // TODO: handle feedback
+
+      if(response.body.isNotEmpty && response.statusCode == 200) {
+        _showFeedback(response.body);
+      }
     } finally {
       client.close();
     }
@@ -252,6 +258,24 @@ class DomainPage extends State<DomainPageStarter> {
     final parsed = json.decode(body).cast<Map<String, dynamic>>();
     return parsed.map<Domain>((json) => Domain.fromJson(json)).toList();
   }
+
+  void _showFeedback(String msg) {
+    print(msg);
+    var feedback = json.decode(msg).cast<Map<String, dynamic>>();
+
+    var snackBar;
+    if(feedback["info"] != null) {
+      snackBar = SnackBar(content: feedback["info"],);
+    }
+
+    if(feedback["error"] != null) {
+      snackBar = SnackBar(content: feedback["error"],);
+    }
+
+    if(snackBar != null) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  }
 }
 
 class Domain {
@@ -267,5 +291,5 @@ Domain _domainFromJson(Map<String, dynamic> json) {
 }
 
 class URL {
-  static const String BASE_URL = 'http://192.168.178.24:9090/api';
+  static const String BASE_URL = 'http://192.168.178.12:9090/api';
 }
