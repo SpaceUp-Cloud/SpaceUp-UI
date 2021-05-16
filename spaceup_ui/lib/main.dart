@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:io' show Platform;
+import 'package:local_auth/local_auth.dart';
+import 'dart:io' show Platform, sleep;
 import 'package:page_transition/page_transition.dart';
 import 'package:spaceup_ui/domain_page.dart';
 import 'package:spaceup_ui/settings_page.dart';
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SpaceUp Client',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Colors.teal,
@@ -66,13 +68,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final LocalAuthentication _localAuthentication = LocalAuthentication();
+  bool _authenticated = false;
+
   // Depending on platform the home widget shows x cards per column
   late int maxElementsPerLine;
 
   @override
   void initState() {
     super.initState();
-
     if (Platform.isWindows || Platform.isLinux) {
       maxElementsPerLine = 8;
     } else if (Platform.isAndroid || Platform.isIOS) {
@@ -84,16 +88,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    //checkingForBioMetrics().then((value) => _authenticateMe());
+
     return Scaffold(
         appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
           title: Text(widget.title!),
         ),
         drawer: Drawer(
@@ -120,9 +118,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         body: Center(
-            // Center is a layout widget. It takes a single child and positions it
-            // in the middle of the parent.
-            child: Center(
           child: GridView.count(
             crossAxisCount: maxElementsPerLine,
             scrollDirection: Axis.vertical,
@@ -131,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   "Domains", UIData.domainsRoute, Colors.teal, Colors.white),
             ],
           ),
-        )));
+        ));
   }
 
   InkWell _createCard(
@@ -157,5 +152,33 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
         ));
+  }
+
+  Future<bool> checkingForBioMetrics() async {
+    bool canCheckBiometrics = await _localAuthentication.canCheckBiometrics;
+    print(canCheckBiometrics);
+    return canCheckBiometrics;
+  }
+
+  Future<void> _authenticateMe() async {
+    var authenticated = false;
+    try {
+      authenticated = await _localAuthentication.authenticate(
+          biometricOnly: true,
+          localizedReason: "Just for SpaceUp users",
+          // message for dialog
+          useErrorDialogs: true,
+          // show error in dialog
+          stickyAuth: true);
+    } catch (e) {
+      print(e);
+    }
+
+    setState(() {
+      print("Authenticated: $authenticated");
+      _authenticated = authenticated;
+    });
+
+    if (!mounted) return;
   }
 }
