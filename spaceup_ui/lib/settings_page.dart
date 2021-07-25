@@ -61,7 +61,7 @@ class SettingsPage extends State<SettingsPageStarter> {
             SettingsTile.switchTile(
               title: 'Use fingerprint',
               leading: Icon(Icons.fingerprint),
-              switchValue: fingerprint,
+              switchValue: this.fingerprint,
               onToggle: (bool value) {
                 setState(() {
                   this.fingerprint = value;
@@ -76,7 +76,7 @@ class SettingsPage extends State<SettingsPageStarter> {
             SettingsTile.switchTile(
               title: 'Use cached domains',
               leading: Icon(Icons.cloud),
-              switchValue: cachedDomains,
+              switchValue: this.cachedDomains,
               onToggle: (bool value) {
                 setState(() {
                    _save('cachedDomains', value).then((bool success) {
@@ -120,60 +120,5 @@ class SettingsPage extends State<SettingsPageStarter> {
       });
     }
   }
-
-  /*<Widget>[] settingsList() {
-    var settingsList = SafeArea(
-      child: ListView(
-        children: [
-          SizedBox(
-              width: 100.0,
-              height: 100.0,
-              child:  SettingsToggleScreen(
-                settingKey: 'key-of-your-setting',
-                title: 'Settings Ui ',
-                children: [],
-              ) ),
-          SimpleSettingsTile(
-            title: 'Conditionally enabled.',
-            enabledIfKey: 'key-of-parent',
-            visibleByDefault: true,
-          ),
-          Settings().onBoolChanged(
-            settingKey: 'key-of-your-setting',
-            defaultValue: false,
-            childBuilder: (BuildContext context, bool value){
-              return Text(value.toString());
-            },
-          ),
-          Settings().onStringChanged(
-            settingKey: 'key-of-your-setting',
-            defaultValue: 'Empty',
-            childBuilder: (BuildContext context, String value){
-              return Text(value);
-            },
-          ),
-          SettingsContainer(
-            children: [
-              Text('First line'),
-              Text('Second line'),
-            ],
-          ),
-          SettingsContainer(
-            child: Text('Settings container'),
-          ),
-          MaterialColorPickerSettingsTile(
-            settingKey: 'key-of-your-setting',
-            title: 'Color Picker',
-            cancelCaption: 'Keep the old value',
-            okCaption: 'Select new',
-            confirmText: 'Are you sure want to modify the previously selected color?',
-            confirmModalTitle: 'Are you sure?',
-            confirmModalCancelCaption: 'Keep the old one',
-            confirmModalConfirmCaption: 'Yes, I am sure',
-          ),
-        ],
-      ),
-    );
-  }*/
 
 }

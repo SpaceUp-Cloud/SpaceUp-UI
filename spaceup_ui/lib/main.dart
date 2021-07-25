@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
-import 'dart:io' show Platform, sleep;
+import 'dart:io' show Platform;
 import 'package:page_transition/page_transition.dart';
 import 'package:spaceup_ui/domain_page.dart';
+import 'package:spaceup_ui/services_page.dart';
 import 'package:spaceup_ui/settings_page.dart';
 import 'package:spaceup_ui/ui_data.dart';
+import 'package:spaceup_ui/style.dart';
 
 void main() {
   runApp(MyApp());
@@ -22,7 +24,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Colors.teal,
-          primarySwatch: Colors.deepOrange),
+          primarySwatch: Colors.deepOrange
+      ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Colors.teal.shade800,
@@ -38,6 +41,12 @@ class MyApp extends StatelessWidget {
             {
               return PageTransition(
                   child: DomainPageStarter(),
+                  type: PageTransitionType.leftToRight);
+            }
+          case '/services':
+            {
+              return PageTransition(
+                  child: ServicesPageStarter(),
                   type: PageTransitionType.leftToRight);
             }
           case '/settings':
@@ -78,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     if (Platform.isWindows || Platform.isLinux) {
-      maxElementsPerLine = 8;
+      maxElementsPerLine = 4;
     } else if (Platform.isAndroid || Platform.isIOS) {
       maxElementsPerLine = 2;
     } else {
@@ -122,34 +131,11 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisCount: maxElementsPerLine,
             scrollDirection: Axis.vertical,
             children: [
-              _createCard(
+              Style().createCard(context,
                   "Domains", UIData.domainsRoute, Colors.teal, Colors.white),
+              Style().createCard(context,
+                  "Services", UIData.servicesRoute, Colors.teal, Colors.white),
             ],
-          ),
-        ));
-  }
-
-  InkWell _createCard(
-      String cardTitle, String path, MaterialColor bgColor, Color fontColor) {
-    return InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, path);
-        },
-        child: Card(
-          semanticContainer: true,
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          elevation: 4,
-          margin: EdgeInsets.all(10),
-          color: bgColor,
-          child: Center(
-            child: Text(
-              cardTitle,
-              style: TextStyle(
-                  color: fontColor, fontSize: 16, fontWeight: FontWeight.bold),
-            ),
           ),
         ));
   }

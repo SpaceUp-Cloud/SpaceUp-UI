@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
+import 'package:spaceup_ui/util.dart';
+import 'ui_data.dart';
 
 class DomainPageStarter extends StatefulWidget {
   DomainPageStarter() : super();
@@ -61,7 +63,10 @@ class DomainPage extends State<DomainPageStarter> {
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       body: Stack(
         children: [
-          RefreshIndicator(child: scrollCardsView, onRefresh: _onRefresh, key: refreshKey)
+          RefreshIndicator(
+              child: scrollCardsView,
+              onRefresh: _refreshDomains,
+              key: refreshKey)
         ],
       ),
     );
@@ -69,7 +74,7 @@ class DomainPage extends State<DomainPageStarter> {
     return scaffold;
   }
 
-  Future<void> _onRefresh() async {
+  Future<void> _refreshDomains() async {
     setState(() {
       domains = _getDomains(false);
     });
@@ -119,7 +124,7 @@ class DomainPage extends State<DomainPageStarter> {
 
           // By default, show a loading spinner.
           return Center(
-            child: CircularProgressIndicator(),
+            child:  LinearProgressIndicator(),
           );
         });
   }
@@ -204,7 +209,8 @@ class DomainPage extends State<DomainPageStarter> {
       var response = await client.delete(uri!);
 
       if(response.body.isNotEmpty && response.statusCode == 200) {
-        _showFeedback(response.body);
+        Util.showFeedback(context, response.body);
+        _refreshDomains();
       }
     } finally {
       client.close();
@@ -230,7 +236,8 @@ class DomainPage extends State<DomainPageStarter> {
           body: json.encode(domains));
 
       if(response.body.isNotEmpty && response.statusCode == 200) {
-        _showFeedback(response.body);
+        Util.showFeedback(context, response.body);
+        _refreshDomains();
       }
     } finally {
       client.close();
@@ -259,23 +266,6 @@ class DomainPage extends State<DomainPageStarter> {
     return parsed.map<Domain>((json) => Domain.fromJson(json)).toList();
   }
 
-  void _showFeedback(String msg) {
-    print(msg);
-    var feedback = json.decode(msg).cast<Map<String, dynamic>>();
-
-    var snackBar;
-    if(feedback["info"] != null) {
-      snackBar = SnackBar(content: feedback["info"],);
-    }
-
-    if(feedback["error"] != null) {
-      snackBar = SnackBar(content: feedback["error"],);
-    }
-
-    if(snackBar != null) {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
-  }
 }
 
 class Domain {
@@ -288,8 +278,4 @@ class Domain {
 
 Domain _domainFromJson(Map<String, dynamic> json) {
   return Domain(url: json["url"] as String);
-}
-
-class URL {
-  static const String BASE_URL = 'http://192.168.178.12:9090/api';
 }
