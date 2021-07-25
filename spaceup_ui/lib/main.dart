@@ -108,9 +108,10 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               DrawerHeader(
-                  // TODO: Display SpaceUp Icon
-                  decoration: BoxDecoration(color: Colors.teal),
-                  child: Text('Menu')),
+                // TODO: Display SpaceUp Icon
+                decoration: BoxDecoration(color: Colors.teal),
+                child: Text('Menu')
+              ),
               ListTile(
                 title: Text('Settings'),
                 onTap: () {
@@ -131,10 +132,15 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisCount: maxElementsPerLine,
             scrollDirection: Axis.vertical,
             children: [
-              Style().createCard(context,
-                  "Domains", UIData.domainsRoute, Colors.teal, Colors.white),
-              Style().createCard(context,
-                  "Services", UIData.servicesRoute, Colors.teal, Colors.white),
+              Style().createCard(context, Icons.cloud,
+                  "Domains", UIData.domainsRoute,
+                  Colors.teal, Colors.white),
+              Style().createCard(context, Icons.miscellaneous_services,
+                  "Services", UIData.servicesRoute,
+                  Colors.teal, Colors.white),
+              Style().createCard(context, Icons.miscellaneous_services,
+                  "Services", UIData.servicesRoute,
+                  Colors.teal, Colors.white),
             ],
           ),
         ));

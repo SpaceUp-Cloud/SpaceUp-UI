@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Style {
   InkWell createCard(
-      BuildContext context,
+      BuildContext context, IconData myIcon,
       String cardTitle, String path, MaterialColor bgColor, Color fontColor) {
 
     return InkWell(
@@ -16,15 +16,25 @@ class Style {
             borderRadius: BorderRadius.circular(10.0),
           ),
           elevation: 4,
-          margin: EdgeInsets.all(12),
+          margin: EdgeInsets.fromLTRB(5.0, 15.0, 5.0, 30.0),
           color: bgColor,
-          child: Center(
-            child: Text(
-              cardTitle,
-              style: TextStyle(
-                  color: fontColor, fontSize: 15, fontWeight: FontWeight.bold),
-            ),
-          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(
+                  myIcon,
+                  color: fontColor,
+                  size: 25,
+                ),
+                title: Text(
+                  cardTitle,
+                  style: TextStyle(
+                      color: fontColor, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              )
+            ],
+          )
         ));
   }
 }
