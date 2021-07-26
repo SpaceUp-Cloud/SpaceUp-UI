@@ -12,7 +12,7 @@ class Style {
         child: Card(
           semanticContainer: true,
           clipBehavior: Clip.antiAliasWithSaveLayer,
-          shape: RoundedRectangleBorder(
+          shape: ContinuousRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
           elevation: 4,
@@ -22,6 +22,7 @@ class Style {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
+                contentPadding: EdgeInsets.all(5.0),
                 leading: Icon(
                   myIcon,
                   color: fontColor,
