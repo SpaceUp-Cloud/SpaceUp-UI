@@ -27,11 +27,11 @@ dependencies:
   local_auth: ^1.1.5
   http: ^0.13.2
   page_transition: ^2.0.2
-  settings_ui: ^1.0.0
-  #shared_preferences_settings: ^2.0.0
+  #settings_ui: ^1.0.0
+  shared_preferences_settings: ^1.2.0
 
-  shared_preferences: ^2.0.5
-  shared_preferences_windows: ^2.0.0
+  #shared_preferences: ^2.0.5
+  #shared_preferences_windows: ^2.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
