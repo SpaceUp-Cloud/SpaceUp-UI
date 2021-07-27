@@ -1,8 +1,8 @@
 import 'dart:io' show Platform;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/util.dart';
 
 class SettingsPageStarter extends StatefulWidget {
   SettingsPageStarter() : super();
@@ -13,46 +13,77 @@ class SettingsPageStarter extends StatefulWidget {
 
 class SettingsPage extends State<SettingsPageStarter> {
 
+  // Add desktop/web specific settings
+  //get desktopAndWebSettings =>
+
   @override
   Widget build(BuildContext context) {
-    final settingsList = SettingsScreen(
-      title: "SpaceUp Settings",
-      children: [
-        SimpleSettingsTile(
-          title: "App",
-          screen: SettingsScreen(
-            title: "App",
+    final Util util = Util();
+
+    final submenus = <Widget>[];
+    if(util.isMobile) {
+      // ... mobile specific
+      submenus.add(
+          SettingsContainer(
             children: [
+              Text("App"),
               SwitchSettingsTile(
                 title: 'Fingerprint enabled',
                 icon: Icon(Icons.fingerprint),
-                settingKey: "isFingerprintEnabled",
+                settingKey: "fingerprint_enabled",
                 defaultValue: false,
-              ),
+              )
             ],
-          ),
-        ),
-        SimpleSettingsTile(
-          title: "Domains",
-          screen: SettingsScreen(
-            title: "Domains",
+          )
+      );
+    }
+    if(util.isWeb) {
+      // ... web specific
+    }
+
+    /*if(util.isDesktop) {
+      // ... desktop specific
+    }*/
+
+    // Das not work yet on desktop but web
+    if(!util.isDesktop || util.isWeb) {
+      /*submenus.add(SimpleSettingsTile(
+        title: "Advanced",
+        screen:
+      ));*/
+      submenus.add(
+          SettingsContainer(
             children: [
+              Text("Domains"),
               SwitchSettingsTile(
                 title: 'Cached Domains',
                 settingKey: "isCachedDomain",
                 defaultValue: false,
-              ),
+              )
             ],
-          ),
-        ),
-      ],
+          )
+      );
+    }
+
+    if(util.isDesktop && !util.isWeb){
+      submenus.add(
+        SettingsContainer(
+          child: Text("Does not work yet on desktop."),
+        )
+      );
+    }
+
+    // ... for all platforms
+
+
+    final settingsList = SettingsScreen(
+      title: "SpaceUp Settings",
+      children: submenus,
     );
 
-    final scaffold = Scaffold(
+    return Scaffold(
         body: settingsList
     );
-
-    return scaffold;
   }
 
 }

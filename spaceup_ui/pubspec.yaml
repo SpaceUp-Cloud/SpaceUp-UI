@@ -27,7 +27,7 @@ dependencies:
   local_auth: ^1.1.5
   http: ^0.13.2
   page_transition: ^2.0.2
-  #settings_ui: ^1.0.0
+  universal_io: ^2.0.4
   shared_preferences_settings: ^1.2.0
 
   #shared_preferences: ^2.0.5

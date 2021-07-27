@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
+import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/util.dart';
-import 'ui_data.dart';
+import 'package:spaceup_ui/ui_data.dart';
 
 class DomainPageStarter extends StatefulWidget {
   DomainPageStarter() : super();
@@ -27,7 +28,7 @@ class DomainPage extends State<DomainPageStarter> {
   @override
   void initState() {
     super.initState();
-    domains = _getDomains(isCached);
+    domains = _getDomains();
 
     scrollController.addListener(() {
       setState(() {
@@ -76,7 +77,7 @@ class DomainPage extends State<DomainPageStarter> {
 
   Future<void> _refreshDomains() async {
     setState(() {
-      domains = _getDomains(false);
+      domains = _getDomains();
     });
   }
 
@@ -113,6 +114,7 @@ class DomainPage extends State<DomainPageStarter> {
   FutureBuilder<List<Domain>> createDomainCards() {
     return FutureBuilder<List<Domain>>(
         future: domains,
+        initialData: <Domain>[],
         builder: (context, AsyncSnapshot<List<Domain>> snapshot) {
           if (snapshot.hasData &&
               snapshot.data != null &&
@@ -244,10 +246,11 @@ class DomainPage extends State<DomainPageStarter> {
     }
   }
 
-  Future<List<Domain>> _getDomains(bool isCached) async {
+  Future<List<Domain>> _getDomains() async {
     var domains = <Domain>[];
     final httpClient = http.Client();
     final client = RetryClient(httpClient);
+    var isCached = await Settings().getBool("isCachedDomain", false);
 
     try {
       var response = await client

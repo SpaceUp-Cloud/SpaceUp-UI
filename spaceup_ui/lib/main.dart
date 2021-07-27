@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
-import 'dart:io' show Platform;
+//import 'package:local_auth/local_auth.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:spaceup_ui/domain_page.dart';
 import 'package:spaceup_ui/services_page.dart';
 import 'package:spaceup_ui/settings_page.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/style.dart';
+import 'package:spaceup_ui/util.dart';
 
 void main() {
   runApp(MyApp());
@@ -77,8 +77,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final LocalAuthentication _localAuthentication = LocalAuthentication();
-  bool _authenticated = false;
+  /*final LocalAuthentication _localAuthentication = LocalAuthentication();
+  bool _authenticated = false;*/
 
   // Depending on platform the home widget shows x cards per column
   late int maxElementsPerLine;
@@ -86,9 +86,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    if (Platform.isWindows || Platform.isLinux) {
-      maxElementsPerLine = 4;
-    } else if (Platform.isAndroid || Platform.isIOS) {
+    final Util util = Util();
+    if (util.isDesktop) {
+      maxElementsPerLine = 12;
+    } else if (util.isMobile) {
       maxElementsPerLine = 2;
     } else {
       maxElementsPerLine = 2;
@@ -113,6 +114,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text('Menu')
               ),
               ListTile(
+                title: Text("Domains"),
+                onTap: () {
+                  Navigator.pushNamed(context, UIData.domainsRoute);
+                },
+              ),
+              ListTile(
+                title: Text("Services"),
+                onTap: () {
+                  Navigator.pushNamed(context, UIData.servicesRoute);
+                },
+              ),
+              Divider(height: 1.0,),
+              ListTile(
                 title: Text('Settings'),
                 onTap: () {
                   Navigator.pushNamed(context, UIData.settingsRoute);
@@ -127,8 +141,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
-        body: Center(
-          child: GridView.count(
+        body: Container(
+          child: null /*GridView.count(
             crossAxisCount: maxElementsPerLine,
             scrollDirection: Axis.vertical,
             children: [
@@ -138,14 +152,12 @@ class _MyHomePageState extends State<MyHomePage> {
               Style().createCard(context, Icons.miscellaneous_services,
                   "Services", UIData.servicesRoute,
                   Colors.teal, Colors.white),
-              Style().createCard(context, Icons.miscellaneous_services,
-                  "Services", UIData.servicesRoute,
-                  Colors.teal, Colors.white),
             ],
-          ),
+          ),*/
         ));
   }
 
+  /*
   Future<bool> checkingForBioMetrics() async {
     bool canCheckBiometrics = await _localAuthentication.canCheckBiometrics;
     print(canCheckBiometrics);
@@ -172,5 +184,5 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     if (!mounted) return;
-  }
+  }*/
 }

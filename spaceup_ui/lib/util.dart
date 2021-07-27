@@ -1,8 +1,15 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:universal_io/io.dart';
 
 class Util {
+
+  bool get isDesktop => (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+  bool get isMobile => (Platform.isIOS || Platform.isAndroid);
+  bool get isWeb => kIsWeb ? true : false;
+
   static void showFeedback(BuildContext context, String msg) {
     print(msg);
     var feedback;
