@@ -28,7 +28,7 @@ class DomainPage extends State<DomainPageStarter> {
   @override
   void initState() {
     super.initState();
-    domains = _getDomains();
+    domains = _getDomains(true);
 
     scrollController.addListener(() {
       setState(() {
@@ -77,7 +77,7 @@ class DomainPage extends State<DomainPageStarter> {
 
   Future<void> _refreshDomains() async {
     setState(() {
-      domains = _getDomains();
+      domains = _getDomains(false);
     });
   }
 
@@ -246,11 +246,11 @@ class DomainPage extends State<DomainPageStarter> {
     }
   }
 
-  Future<List<Domain>> _getDomains() async {
+  Future<List<Domain>> _getDomains(bool useCached) async {
     var domains = <Domain>[];
     final httpClient = http.Client();
     final client = RetryClient(httpClient);
-    var isCached = await Settings().getBool("isCachedDomain", false);
+    var isCached = await Settings().getBool("isCachedDomain", false) && useCached;
 
     try {
       var response = await client
