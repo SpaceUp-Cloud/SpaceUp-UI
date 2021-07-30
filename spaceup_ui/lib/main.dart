@@ -1,11 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 //import 'package:local_auth/local_auth.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:spaceup_ui/domain_page.dart';
-import 'package:spaceup_ui/services_page.dart';
-import 'package:spaceup_ui/settings_page.dart';
+import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/pages/domain_page.dart';
+import 'package:spaceup_ui/pages/services_page.dart';
+import 'package:spaceup_ui/pages/settings_page.dart';
 import 'package:spaceup_ui/ui_data.dart';
-import 'package:spaceup_ui/style.dart';
 import 'package:spaceup_ui/util.dart';
 
 void main() {
@@ -80,6 +81,10 @@ class _MyHomePageState extends State<MyHomePage> {
   /*final LocalAuthentication _localAuthentication = LocalAuthentication();
   bool _authenticated = false;*/
 
+  var profiles = <String>[];
+  var activeProfile = "";
+  late String selectedProfile = "http://localhost:9090";
+
   // Depending on platform the home widget shows x cards per column
   late int maxElementsPerLine;
 
@@ -96,12 +101,58 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void getProfiles() async {
+    var savedProfiles = await Settings()
+        .getString("profiles", "http://localhost:9090");
+    profiles = savedProfiles.replaceAll(" ", "").split(";");
+    activeProfile = await Settings()
+        .getString("profile_active", "http://localhost:9090");
+
+    setState(() {
+      if(activeProfile.isEmpty && !profiles.contains(activeProfile)) {
+        String defaultProfile = "http://localhost:9090";
+        Settings().save("profiles", defaultProfile);
+        Settings().save("profile_active", defaultProfile);
+        profiles.add(defaultProfile);
+        activeProfile = defaultProfile;
+      }
+
+      selectedProfile = activeProfile != "" && profiles.contains(activeProfile)
+          ? activeProfile : profiles.first;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     //checkingForBioMetrics().then((value) => _authenticateMe());
 
+    // Get server profiles
+    getProfiles();
+
     return Scaffold(
         appBar: AppBar(
+          actions: [
+            Container(
+              padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+              child: DropdownButton<String>(
+                value: selectedProfile,
+                onTap: getProfiles,
+                onChanged: (String? newProfile) {
+                  setState(() {
+                    selectedProfile = newProfile!;
+                    Settings().save("profile_active", selectedProfile);
+                  });
+                },
+                items: profiles.map<DropdownMenuItem<String>>((String e) {
+                  return DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  );
+                }).toList(),
+              ),
+
+            ),
+          ],
           title: Text(widget.title!),
         ),
         drawer: Drawer(
@@ -113,6 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 decoration: BoxDecoration(color: Colors.teal),
                 child: Text('Menu')
               ),
+
               ListTile(
                 title: Text("Domains"),
                 onTap: () {

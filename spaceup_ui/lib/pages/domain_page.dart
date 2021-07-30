@@ -20,10 +20,9 @@ class DomainPage extends State<DomainPageStarter> {
   ScrollController scrollController = ScrollController();
   var refreshKey = GlobalKey<RefreshIndicatorState>();
 
-  late Future<List<Domain>> domains;
-  bool isCached = false;
-
   bool fabIsVisible = true;
+
+  late Future<List<Domain>> domains;
 
   @override
   void initState() {
@@ -207,7 +206,8 @@ class DomainPage extends State<DomainPageStarter> {
     final client = RetryClient(httpClient);
 
     try {
-      var uri = Uri.tryParse('${URL.BASE_URL}/domain/delete/${domain.url}');
+      var url = await URL().baseUrl;
+      var uri = Uri.tryParse('$url/domain/delete/${domain.url}');
       var response = await client.delete(uri!);
 
       if(response.body.isNotEmpty && response.statusCode == 200) {
@@ -231,9 +231,10 @@ class DomainPage extends State<DomainPageStarter> {
     });
 
     try {
-      var uri = Uri.tryParse('${URL.BASE_URL}/domain/add');
+      var url = await URL().baseUrl;
+      var addDomainUrl = Uri.tryParse('$url/domain/add');
       var response = await client.post(
-          uri!,
+          addDomainUrl!,
           headers: {"Content-Type": "application/json"},
           body: json.encode(domains));
 
@@ -253,8 +254,10 @@ class DomainPage extends State<DomainPageStarter> {
     var isCached = await Settings().getBool("isCachedDomain", false) && useCached;
 
     try {
+      var url = await URL().baseUrl;
+      var getDomainsUrl = "$url/domain/list?cached=$isCached";
       var response = await client
-          .get(Uri.tryParse('${URL.BASE_URL}/domain/list?cached=$isCached')!);
+          .get(Uri.tryParse(getDomainsUrl)!);
       if (response.statusCode == 200) {
         domains = _parseDomains(response.body);
       }

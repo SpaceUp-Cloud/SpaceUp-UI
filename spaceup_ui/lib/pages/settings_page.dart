@@ -52,6 +52,19 @@ class SettingsPage extends State<SettingsPageStarter> {
         screen:
       ));*/
       submenus.add(
+        SettingsContainer(
+          children: [
+            Text("Profiles"),
+            TextFieldModalSettingsTile(
+                settingKey: "profiles",
+                title: "Profiles",
+                subtitle: "Separate by semicolon.",
+                keyboardType: TextInputType.multiline,
+            )
+          ],
+        )
+      );
+      submenus.add(
           SettingsContainer(
             children: [
               Text("Domains"),

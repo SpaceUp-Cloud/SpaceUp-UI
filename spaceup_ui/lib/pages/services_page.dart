@@ -132,8 +132,9 @@ class ServicesPage extends State<ServicesPageStarter> {
     final client = RetryClient(httpClient);
 
     try {
+      var url = await URL().baseUrl;
       var response = await client
-          .get(Uri.tryParse('${URL.BASE_URL}/service/list')!);
+          .get(Uri.tryParse('$url/service/list')!);
       if (response.statusCode == 200) {
         domains = _parseServices(response.body);
       }
@@ -147,7 +148,8 @@ class ServicesPage extends State<ServicesPageStarter> {
     final client = RetryClient(http.Client());
 
     try {
-      var uri = Uri.tryParse('${URL.BASE_URL}/service/execute/$servicename/$action');
+      var url = await URL().baseUrl;
+      var uri = Uri.tryParse('$url/service/execute/$servicename/$action');
       var response  = await client.post(uri!);
       if(response.body.isNotEmpty) {
         Util.showFeedback(context, response.body);
