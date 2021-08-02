@@ -4,6 +4,7 @@ class UIData {
   static const String domainsRoute = "/domains";
   static const String settingsRoute = "/settings";
   static const String servicesRoute = "/services";
+  static const String homeRoute = "/home";
 }
 
 class URL {
@@ -14,6 +15,10 @@ class URL {
     baseApiUrl = await Settings().getString("profile_active", "") + baseApiUrl;
     print("BaseApiUrl: $baseApiUrl");
     return baseApiUrl;
+  }
+
+  Future<String> get serverUrl async {
+    return await Settings().getString("profile_active", "");
   }
 
 }

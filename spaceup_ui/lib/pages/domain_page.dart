@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/util.dart';
 import 'package:spaceup_ui/ui_data.dart';
@@ -208,7 +209,8 @@ class DomainPage extends State<DomainPageStarter> {
     try {
       var url = await URL().baseUrl;
       var uri = Uri.tryParse('$url/domain/delete/${domain.url}');
-      var response = await client.delete(uri!);
+      var jwt = await Util().getJWT();
+      var response = await client.delete(uri!, headers: jwt);
 
       if(response.body.isNotEmpty && response.statusCode == 200) {
         Util.showFeedback(context, response.body);
@@ -232,10 +234,11 @@ class DomainPage extends State<DomainPageStarter> {
 
     try {
       var url = await URL().baseUrl;
+      var jwt = await Util().getJWT();
       var addDomainUrl = Uri.tryParse('$url/domain/add');
       var response = await client.post(
           addDomainUrl!,
-          headers: {"Content-Type": "application/json"},
+          headers: jwt,
           body: json.encode(domains));
 
       if(response.body.isNotEmpty && response.statusCode == 200) {
@@ -255,9 +258,10 @@ class DomainPage extends State<DomainPageStarter> {
 
     try {
       var url = await URL().baseUrl;
+      var jwt = await Util().getJWT();
       var getDomainsUrl = "$url/domain/list?cached=$isCached";
       var response = await client
-          .get(Uri.tryParse(getDomainsUrl)!);
+          .get(Uri.tryParse(getDomainsUrl)!, headers: jwt);
       if (response.statusCode == 200) {
         domains = _parseDomains(response.body);
       }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:universal_io/io.dart';
 
 class Util {
@@ -45,4 +46,44 @@ class Util {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
+
+  static void showMessage(BuildContext context, String msg) {
+    final snackBar = SnackBar(content: Text(msg));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  Future<Map<String, String>> getJWT() async {
+    String jwt = await Settings().getString("jwt", "");
+    Map<String, String> headers = {
+      "Authorization": 'Bearer $jwt',
+      "Content-type": 'application/json'
+    };
+
+    return headers;
+  }
+}
+
+class JWT {
+  String username;
+  String access_token;
+  String token_type;
+  int expires_in;
+
+  JWT({
+    required this.username,
+    required this.access_token,
+    required this.token_type,
+    required this.expires_in
+  });
+
+  factory JWT.fromJson(Map<String, dynamic> json) => _jwtFromJson(json);
+}
+
+JWT _jwtFromJson(Map<String, dynamic> json) {
+  return JWT(
+      username: json["username"] as String,
+      access_token: json["access_token"] as String,
+      token_type: json["token_type"] as String,
+      expires_in: json["expires_in"] as int
+  );
 }

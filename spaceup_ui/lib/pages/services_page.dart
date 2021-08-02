@@ -133,8 +133,9 @@ class ServicesPage extends State<ServicesPageStarter> {
 
     try {
       var url = await URL().baseUrl;
+      var jwt = await Util().getJWT();
       var response = await client
-          .get(Uri.tryParse('$url/service/list')!);
+          .get(Uri.tryParse('$url/service/list')!, headers: jwt);
       if (response.statusCode == 200) {
         domains = _parseServices(response.body);
       }
@@ -149,8 +150,9 @@ class ServicesPage extends State<ServicesPageStarter> {
 
     try {
       var url = await URL().baseUrl;
+      var jwt = await Util().getJWT();
       var uri = Uri.tryParse('$url/service/execute/$servicename/$action');
-      var response  = await client.post(uri!);
+      var response  = await client.post(uri!, headers: jwt);
       if(response.body.isNotEmpty) {
         Util.showFeedback(context, response.body);
         _onRefresh();
