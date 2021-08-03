@@ -106,7 +106,10 @@ class _LoginState extends State<LoginPage>{
           body: body
       );
 
+      print("Login status code: ${response.statusCode}");
       if(response.body.isNotEmpty && response.statusCode == 200) {
+        print("Login was successful! ${response.body}");
+
         Settings().save("jwt", JWT.fromJson(jsonDecode(response.body)).access_token);
         Settings().save("profile_active", url);
         Util.showMessage(context, "Login successful!");
@@ -119,8 +122,14 @@ class _LoginState extends State<LoginPage>{
 
   Future<void> checkJWT(BuildContext context) async {
     final jwt = await Settings().getString("jwt", "");
-    if(!JwtDecoder.isExpired(jwt)) {
-      Navigator.pushNamed(context, UIData.homeRoute);
+    try {
+      if(!JwtDecoder.isExpired(jwt)) {
+        Navigator.pushNamed(context, UIData.homeRoute);
+      } else {
+        print("JWT is expired!");
+      }
+    } catch(fe) {
+      print("Token is invalid");
     }
   }
 }

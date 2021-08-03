@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
@@ -23,10 +27,23 @@ class _HomePageState extends State<HomePage> {
   // Depending on platform the home widget shows x cards per column
   late int maxElementsPerLine;
 
+  // System information
+  String hostname = "";
+  Disk disk = Disk(
+      space: "",
+      spacePercentage: 0.0,
+      quota: "",
+      availableQuota: 0.0
+  );
+
+
   @override
   void initState() {
     super.initState();
-    getProfiles();
+    initHostname();
+    initDisk();
+
+    initProfiles();
 
     final Util util = Util();
     if (util.isDesktop) {
@@ -38,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void getProfiles() async {
+  void initProfiles() async {
     var savedProfiles = await Settings()
         .getString("profiles", "http://localhost:9090");
     profiles = savedProfiles.replaceAll(" ", "").split(";");
@@ -61,10 +78,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     //checkingForBioMetrics().then((value) => _authenticateMe());
-
     // Get server profiles
-    getProfiles();
+    initProfiles();
 
     return Scaffold(
         appBar: AppBar(
@@ -73,7 +90,7 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
               child: DropdownButton<String>(
                 value: selectedProfile,
-                onTap: getProfiles,
+                onTap: initProfiles,
                 onChanged: (String? newProfile) {
                   setState(() {
                     selectedProfile = newProfile!;
@@ -130,20 +147,91 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        body: Container(
-            child: null /*GridView.count(
-            crossAxisCount: maxElementsPerLine,
-            scrollDirection: Axis.vertical,
+        body: Padding(
+          padding: EdgeInsets.all(2.0),
+          child: ListView(
             children: [
-              Style().createCard(context, Icons.cloud,
-                  "Domains", UIData.domainsRoute,
-                  Colors.teal, Colors.white),
-              Style().createCard(context, Icons.miscellaneous_services,
-                  "Services", UIData.servicesRoute,
-                  Colors.teal, Colors.white),
-            ],
-          ),*/
-        ));
+              Card(
+                //margin: EdgeInsets.fromLTRB(10.0, 5.0, 0.0, 5.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.cloud),
+                      title: Text("Hostname: " + hostname),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child: Row(
+                        children: [
+                          Text("Storage:"),
+                          Card(
+                            child: Text("Quota: ${disk.quota}"),
+                            margin: EdgeInsets.all(5.0),
+                            color: theme.buttonColor,
+                          ),
+                          Card(
+                            child: Text("Quota available: ${disk.availableQuota}%"),
+                            margin: EdgeInsets.all(5.0),
+                            color: theme.buttonColor,
+                          ),
+                          Card(
+                            child: Text("Space: ${disk.space}"),
+                            margin: EdgeInsets.all(5.0),
+                            color: theme.buttonColor,
+                          ),
+                          Card(
+                            child: Text("Space usage: ${disk.spacePercentage} %"),
+                            margin: EdgeInsets.all(5.0),
+                            color: theme.buttonColor,
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                )
+              ),
+            ])
+          ),
+        );
+  }
+
+  Future<void> initHostname() async {
+    final client = RetryClient(http.Client());
+    
+    try {
+      final url = await URL().baseUrl;
+      final jwt = await Util().getJWT();
+      
+      var response = await client.get(
+          Uri.tryParse('$url/system/hostname')!,
+          headers: jwt);
+      print(response.body);
+      if(response.body.isNotEmpty && response.statusCode == 200) {
+        this.hostname = jsonDecode(response.body)["hostname"];
+      }
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<void> initDisk() async {
+    final client = RetryClient(http.Client());
+
+    try {
+      final url = await URL().baseUrl;
+      final jwt = await Util().getJWT();
+
+      var response = await client.get(
+          Uri.tryParse('$url/system/disk')!,
+          headers: jwt);
+      print(response.body);
+      if(response.body.isNotEmpty && response.statusCode == 200) {
+        this.disk = Disk.fromJson(jsonDecode(response.body));
+      }
+    } finally {
+      client.close();
+    }
   }
 
 /*
@@ -174,4 +262,29 @@ class _HomePageState extends State<HomePage> {
 
     if (!mounted) return;
   }*/
+}
+
+class Disk {
+  String space;
+  double spacePercentage;
+  String quota;
+  double availableQuota;
+
+  Disk({
+    required this.space,
+    required this.spacePercentage,
+    required this.quota,
+    required this.availableQuota
+  });
+  
+  factory Disk.fromJson(Map<String, dynamic> json) => _diskFromJson(json);
+}
+
+Disk _diskFromJson(Map<String, dynamic> json) {
+  return Disk(
+      space: json["space"], 
+      spacePercentage: json["spacePercentage"],
+      quota: json["quota"], 
+      availableQuota: json["availableQuota"]
+    );
 }

@@ -101,10 +101,11 @@ class DomainPage extends State<DomainPageStarter> {
                 _deleteDomainDialog(domain);
               },
             ),
-            const SizedBox(width: 4),
-          ],
-        ),
-      ]));
+              const SizedBox(width: 4),
+            ],
+          ),
+        ])
+      );
       cards.add(card);
     });
 
