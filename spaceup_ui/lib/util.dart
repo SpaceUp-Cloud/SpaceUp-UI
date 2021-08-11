@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/pages/home_page.dart';
+import 'package:spaceup_ui/pages/login_page.dart';
+import 'package:spaceup_ui/ui_data.dart';
 import 'package:universal_io/io.dart';
 
 class Util {
@@ -62,8 +65,13 @@ class Util {
     return headers;
   }
 
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     Settings().save("jwt", "");
+    Navigator.of(context).pushReplacementNamed(UIData.loginRoute);
+  }
+
+  Future<void> login(BuildContext context) async {
+    Navigator.of(context).pushReplacementNamed(UIData.homeRoute);
   }
 }
 

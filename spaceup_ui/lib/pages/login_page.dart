@@ -136,7 +136,10 @@ class _LoginState extends State<LoginPage>{
         Settings().save("rememberLogin", rememberLogin);
 
         Util.showMessage(context, "Login successful!");
-        Navigator.pushNamed(context, UIData.homeRoute);
+        Util().login(context);
+      } else {
+        String msg = response.statusCode == 401 ? "Wrong credentials" : "Code: ${response.statusCode}";
+        Util.showMessage(context, "Error: $msg");
       }
     } finally {
       client.close();
@@ -147,7 +150,7 @@ class _LoginState extends State<LoginPage>{
     final jwt = await Settings().getString("jwt", "");
     try {
       if(!JwtDecoder.isExpired(jwt)) {
-        Navigator.pushNamed(context, UIData.homeRoute);
+        Util().login(context);
       } else {
         print("JWT is expired!");
       }

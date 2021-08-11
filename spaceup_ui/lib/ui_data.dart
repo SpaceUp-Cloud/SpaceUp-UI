@@ -5,7 +5,7 @@ class UIData {
   static const String settingsRoute = "/settings";
   static const String servicesRoute = "/services";
   static const String homeRoute = "/home";
-  static const String loginRoute = "/login";
+  static const String loginRoute = "/";
 }
 
 class URL {

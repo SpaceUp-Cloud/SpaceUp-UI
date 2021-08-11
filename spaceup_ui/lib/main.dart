@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.teal,
       ),
       home: LoginPage(),
-      initialRoute: null,
+      initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
         switch (settings.name) {
           case '/domains':
@@ -59,7 +59,13 @@ class MyApp extends StatelessWidget {
                   child: SettingsPageStarter(),
                   type: PageTransitionType.leftToRight);
             }
-          case '/login':
+          case '/home':
+            {
+              return PageTransition(
+                  child: HomePage("Home"),
+                  type: PageTransitionType.leftToRight);
+            }
+          case '/':
             {
               return PageTransition(
                   child: LoginPage(),
@@ -68,7 +74,7 @@ class MyApp extends StatelessWidget {
           default:
             {
               return PageTransition(
-                  child: HomePage("Home"),
+                  child: LoginPage(),
                   type: PageTransitionType.leftToRight);
             }
         }

@@ -148,8 +148,7 @@ class _HomePageState extends State<HomePage> {
               ListTile(
                 title: Text('Logout'),
                 onTap: () {
-                  Util().logout();
-                  Navigator.pushNamed(context, UIData.loginRoute);
+                  Util().logout(context);
                 },
               )
             ],
