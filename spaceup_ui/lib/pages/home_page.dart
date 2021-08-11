@@ -144,6 +144,14 @@ class _HomePageState extends State<HomePage> {
                   Navigator.pop(context);
                 },
               ),
+              Divider(height: 1.0,),
+              ListTile(
+                title: Text('Logout'),
+                onTap: () {
+                  Util().logout();
+                  Navigator.pushNamed(context, UIData.loginRoute);
+                },
+              )
             ],
           ),
         ),
@@ -162,29 +170,29 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Padding(
                       padding: EdgeInsets.all(5.0),
-                      child: Row(
+                      child: Column(
                         children: [
-                          Text("Storage:"),
-                          Card(
-                            child: Text("Quota: ${disk.quota}"),
-                            margin: EdgeInsets.all(5.0),
-                            color: theme.buttonColor,
+                          Text("Quota"),
+                          Row(
+                            children: [
+                              Text("Used:"),
+                              Card(
+                                child: Text("${disk.space} / ${disk.spacePercentage}%"),
+                                margin: EdgeInsets.all(5.0),
+                                color: theme.buttonColor,
+                              )
+                            ],
                           ),
-                          Card(
-                            child: Text("Quota available: ${disk.availableQuota}%"),
-                            margin: EdgeInsets.all(5.0),
-                            color: theme.buttonColor,
-                          ),
-                          Card(
-                            child: Text("Space: ${disk.space}"),
-                            margin: EdgeInsets.all(5.0),
-                            color: theme.buttonColor,
-                          ),
-                          Card(
-                            child: Text("Space usage: ${disk.spacePercentage} %"),
-                            margin: EdgeInsets.all(5.0),
-                            color: theme.buttonColor,
-                          ),
+                          Row(
+                            children: [
+                              Text("Available:"),
+                              Card(
+                                child: Text("${disk.quota} / ${disk.availableQuota}%"),
+                                margin: EdgeInsets.all(5.0),
+                                color: theme.buttonColor,
+                              )
+                            ],
+                          )
                         ],
                       ),
                     )

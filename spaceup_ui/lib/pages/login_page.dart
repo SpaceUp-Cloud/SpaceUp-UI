@@ -19,15 +19,18 @@ class _LoginState extends State<LoginPage>{
   final urlText = TextEditingController();
   final usernameText = TextEditingController();
   final passwordText = TextEditingController();
+  var rememberLogin = false;
 
   late ThemeData theme;
 
   @override
   void initState() {
+
   }
 
   @override
   Widget build(BuildContext context) {
+    getUserSettings();
     checkJWT(context);
 
     theme = Theme.of(context);
@@ -81,6 +84,20 @@ class _LoginState extends State<LoginPage>{
                   child: Text('Login'),
                   onPressed: _login
                 )),
+            Container(
+              child: CheckboxListTile(
+                title: Text('Remember Login?'),
+                secondary: Icon(Icons.remember_me_sharp),
+                value: rememberLogin,
+                onChanged: (bool? value) {
+                  setState(() {
+                    rememberLogin = value!;
+                    Settings().save("rememberLogin", value);
+                  });
+
+                },
+              ),
+            )
           ],
         ),
       )
@@ -112,6 +129,12 @@ class _LoginState extends State<LoginPage>{
 
         Settings().save("jwt", JWT.fromJson(jsonDecode(response.body)).access_token);
         Settings().save("profile_active", url);
+
+        Settings().save("server", url);
+        Settings().save("username", username);
+        Settings().save("password", password);
+        Settings().save("rememberLogin", rememberLogin);
+
         Util.showMessage(context, "Login successful!");
         Navigator.pushNamed(context, UIData.homeRoute);
       }
@@ -130,6 +153,16 @@ class _LoginState extends State<LoginPage>{
       }
     } catch(fe) {
       print("Token is invalid");
+    }
+  }
+
+  Future<void> getUserSettings() async {
+    rememberLogin = await Settings().getBool("rememberLogin", false);
+
+    if(rememberLogin) {
+      urlText.text = await Settings().getString("server", "https://");
+      usernameText.text = await Settings().getString("username", "");
+      passwordText.text = await Settings().getString("password", "");
     }
   }
 }

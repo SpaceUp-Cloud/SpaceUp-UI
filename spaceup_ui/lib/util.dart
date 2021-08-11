@@ -61,6 +61,10 @@ class Util {
 
     return headers;
   }
+
+  Future<void> logout() async {
+    Settings().save("jwt", "");
+  }
 }
 
 class JWT {

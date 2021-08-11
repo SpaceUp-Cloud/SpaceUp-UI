@@ -59,6 +59,12 @@ class MyApp extends StatelessWidget {
                   child: SettingsPageStarter(),
                   type: PageTransitionType.leftToRight);
             }
+          case '/login':
+            {
+              return PageTransition(
+                  child: LoginPage(),
+                  type: PageTransitionType.leftToRight);
+            }
           default:
             {
               return PageTransition(
