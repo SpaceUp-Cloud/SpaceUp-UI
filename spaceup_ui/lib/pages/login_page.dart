@@ -25,15 +25,15 @@ class _LoginState extends State<LoginPage>{
 
   @override
   void initState() {
-
+    super.initState();
+    getUserSettings();
+    checkJWT(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    getUserSettings();
-    checkJWT(context);
-
     theme = Theme.of(context);
+
     final scaffold = Scaffold(
       appBar: AppBar(
         title: Text("SpaceUp Login"),
@@ -49,7 +49,7 @@ class _LoginState extends State<LoginPage>{
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Server Url',
-                    hintText: 'http://your.server:8080'
+                    hintText: 'https://your.server'
                 ),
               ),
             ),
@@ -135,8 +135,7 @@ class _LoginState extends State<LoginPage>{
         Settings().save("password", password);
         Settings().save("rememberLogin", rememberLogin);
 
-        Util.showMessage(context, "Login successful!");
-        Util().login(context);
+        Util.login(context);
       } else {
         String msg = response.statusCode == 401 ? "Wrong credentials" : "Code: ${response.statusCode}";
         Util.showMessage(context, "Error: $msg");
@@ -150,7 +149,7 @@ class _LoginState extends State<LoginPage>{
     final jwt = await Settings().getString("jwt", "");
     try {
       if(!JwtDecoder.isExpired(jwt)) {
-        Util().login(context);
+        Util.login(context);
       } else {
         print("JWT is expired!");
       }

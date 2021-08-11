@@ -65,13 +65,17 @@ class Util {
     return headers;
   }
 
-  Future<void> logout(BuildContext context) async {
+  static Future<void> logout(BuildContext context) async {
     Settings().save("jwt", "");
-    Navigator.of(context).pushReplacementNamed(UIData.loginRoute);
+    //Navigator.of(context).popUntil(ModalRoute.withName(UIData.homeRoute));
+    Navigator.of(context).pushNamedAndRemoveUntil(UIData.loginRoute, (route) => false);
+    showMessage(context, "You have been logged out!");
   }
 
-  Future<void> login(BuildContext context) async {
-    Navigator.of(context).pushReplacementNamed(UIData.homeRoute);
+  static Future<void> login(BuildContext context) async {
+    //Navigator.of(context).popUntil(ModalRoute.withName(UIData.loginRoute));
+    Navigator.of(context).pushNamedAndRemoveUntil(UIData.homeRoute, (route) => false);
+    showMessage(context, "You have been logged in!");
   }
 }
 

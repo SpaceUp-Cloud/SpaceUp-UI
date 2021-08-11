@@ -27,17 +27,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Colors.teal,
-          accentColor: Colors.teal.shade600,
+          accentColor: Colors.teal.shade300,
           primarySwatch: Colors.deepOrange
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        primaryColor: Colors.teal.shade800,
-        accentColor: Colors.teal.shade600,
+        primaryColor: Colors.teal.shade700,
+        accentColor: Colors.teal.shade500,
         primaryColorDark: Colors.white,
         primarySwatch: Colors.teal,
       ),
-      home: LoginPage(),
+      //home: LoginPage(),
       initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
         switch (settings.name) {

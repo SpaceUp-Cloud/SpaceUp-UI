@@ -20,6 +20,10 @@ class _HomePageState extends State<HomePage> {
   /*final LocalAuthentication _localAuthentication = LocalAuthentication();
   bool _authenticated = false;*/
 
+  ScrollController scrollController = ScrollController();
+  var refreshKeyHostname = GlobalKey<RefreshIndicatorState>();
+  var refreshKeyDisk = GlobalKey<RefreshIndicatorState>();
+
   var profiles = <String>[];
   var activeProfile = "";
   late String selectedProfile = "http://localhost:9090";
@@ -28,22 +32,16 @@ class _HomePageState extends State<HomePage> {
   late int maxElementsPerLine;
 
   // System information
-  String hostname = "";
-  Disk disk = Disk(
-      space: "",
-      spacePercentage: 0.0,
-      quota: "",
-      availableQuota: 0.0
-  );
-
+  late Future<String> hostname;
+  late Future<Disk> disk;
 
   @override
   void initState() {
     super.initState();
-    initHostname();
-    initDisk();
-
-    initProfiles();
+    setState(() {
+      hostname = _getHostname();
+      disk = _getDisk();
+    });
 
     final Util util = Util();
     if (util.isDesktop) {
@@ -55,58 +53,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void initProfiles() async {
-    var savedProfiles = await Settings()
-        .getString("profiles", "http://localhost:9090");
-    profiles = savedProfiles.replaceAll(" ", "").split(";");
-    activeProfile = await Settings()
-        .getString("profile_active", "http://localhost:9090");
-
-    setState(() {
-      if(activeProfile.isEmpty && !profiles.contains(activeProfile)) {
-        String defaultProfile = "http://localhost:9090";
-        Settings().save("profiles", defaultProfile);
-        Settings().save("profile_active", defaultProfile);
-        profiles.add(defaultProfile);
-        activeProfile = defaultProfile;
-      }
-
-      selectedProfile = activeProfile != "" && profiles.contains(activeProfile)
-          ? activeProfile : profiles.first;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     //checkingForBioMetrics().then((value) => _authenticateMe());
-    // Get server profiles
-    initProfiles();
 
     return Scaffold(
         appBar: AppBar(
-          actions: [
-            Container(
-              padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
-              child: DropdownButton<String>(
-                value: selectedProfile,
-                onTap: initProfiles,
-                onChanged: (String? newProfile) {
-                  setState(() {
-                    selectedProfile = newProfile!;
-                    Settings().save("profile_active", selectedProfile);
-                  });
-                },
-                items: profiles.map<DropdownMenuItem<String>>((String e) {
-                  return DropdownMenuItem<String>(
-                    value: e,
-                    child: Text(e),
-                  );
-                }).toList(),
-              ),
-
-            ),
-          ],
           title: Text(widget.title!),
         ),
         drawer: Drawer(
@@ -114,11 +67,9 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               DrawerHeader(
-                // TODO: Display SpaceUp Icon
+                  // TODO: Display SpaceUp Icon
                   decoration: BoxDecoration(color: Colors.teal),
-                  child: Text('Menu')
-              ),
-
+                  child: Text('Menu')),
               ListTile(
                 title: Text("Domains"),
                 onTap: () {
@@ -131,7 +82,9 @@ class _HomePageState extends State<HomePage> {
                   Navigator.pushNamed(context, UIData.servicesRoute);
                 },
               ),
-              Divider(height: 1.0,),
+              Divider(
+                height: 1.0,
+              ),
               ListTile(
                 title: Text('Settings'),
                 onTap: () {
@@ -144,101 +97,163 @@ class _HomePageState extends State<HomePage> {
                   Navigator.pop(context);
                 },
               ),
-              Divider(height: 1.0,),
+              Divider(
+                height: 1.0,
+              ),
               ListTile(
                 title: Text('Logout'),
                 onTap: () {
-                  Util().logout(context);
+                  Util.logout(context);
                 },
               )
             ],
           ),
         ),
-        body: Padding(
-          padding: EdgeInsets.all(2.0),
-          child: ListView(
-            children: [
-              Card(
-                //margin: EdgeInsets.fromLTRB(10.0, 5.0, 0.0, 5.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.cloud),
-                      title: Text("Hostname: " + hostname),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(5.0),
-                      child: Column(
-                        children: [
-                          Text("Quota"),
-                          Row(
-                            children: [
-                              Text("Used:"),
-                              Card(
-                                child: Text("${disk.space} / ${disk.spacePercentage}%"),
-                                margin: EdgeInsets.all(5.0),
-                                color: theme.buttonColor,
-                              )
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text("Available:"),
-                              Card(
-                                child: Text("${disk.quota} / ${disk.availableQuota}%"),
-                                margin: EdgeInsets.all(5.0),
-                                color: theme.buttonColor,
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                )
+        body: Column(
+          children: [
+            RefreshIndicator(
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                controller: scrollController,
+                child: getHostnameBuilder(),
               ),
-            ])
-          ),
-        );
+              onRefresh: _getHostname,
+              key: refreshKeyHostname,
+            ),
+            RefreshIndicator(
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                controller: scrollController,
+                child: getDiskBuilder(),
+              ),
+              onRefresh: _getDisk,
+              key: refreshKeyDisk,
+            ),
+          ],
+        ));
   }
 
-  Future<void> initHostname() async {
+  Card createHostnameCard(String hostname) {
+    return Card(
+        //margin: EdgeInsets.fromLTRB(10.0, 5.0, 0.0, 5.0),
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ListTile(
+          leading: Icon(Icons.cloud),
+          title: Text("Hostname: " + hostname),
+        ),
+      ],
+    ));
+  }
+
+  FutureBuilder<String> getHostnameBuilder() {
+    return FutureBuilder<String>(
+        future: hostname,
+        initialData: "",
+        builder: (context, AsyncSnapshot<String> snapshot) {
+          if (snapshot.hasData && snapshot.data != null) {
+            return createHostnameCard(snapshot.data!);
+          } else if (snapshot.hasError) {
+            Util.showMessage(context, "${snapshot.error}");
+          }
+
+          return Center(
+            child: LinearProgressIndicator(),
+          );
+        });
+  }
+
+  FutureBuilder<Disk> getDiskBuilder() {
+    return FutureBuilder<Disk>(
+        future: disk,
+        initialData: Disk(
+            availableQuota: 0.0, quota: "", space: "", spacePercentage: 0.0),
+        builder: (context, AsyncSnapshot<Disk> snapshot) {
+          if (snapshot.hasData && snapshot.data != null) {
+            return createDiskCard(snapshot.data!);
+          } else if (snapshot.hasError) {
+            Util.showMessage(context, "${snapshot.error}");
+          }
+
+
+          return Center(
+            child: LinearProgressIndicator(),
+          );
+        });
+  }
+
+  Card createDiskCard(Disk disk) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(5.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Text("Used:"),
+                Card(
+                  child: Text("${disk.space} / ${disk.spacePercentage}%"),
+                  margin: EdgeInsets.all(5.0),
+                  //color: theme.buttonColor,
+                )
+              ],
+            ),
+            Row(
+              children: [
+                Text("Available:"),
+                Card(
+                  child: Text("${disk.quota} / ${disk.availableQuota}%"),
+                  margin: EdgeInsets.all(5.0),
+                  //color: theme.buttonColor,
+                )
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<String> _getHostname() async {
+    String hostname = "";
+
     final client = RetryClient(http.Client());
-    
     try {
       final url = await URL().baseUrl;
       final jwt = await Util().getJWT();
-      
-      var response = await client.get(
-          Uri.tryParse('$url/system/hostname')!,
-          headers: jwt);
+      var response =
+          await client.get(Uri.tryParse('$url/system/hostname')!, headers: jwt);
       print(response.body);
-      if(response.body.isNotEmpty && response.statusCode == 200) {
-        this.hostname = jsonDecode(response.body)["hostname"];
+      if (response.body.isNotEmpty && response.statusCode == 200) {
+        hostname = jsonDecode(response.body)["hostname"];
       }
     } finally {
       client.close();
     }
+    return hostname;
   }
 
-  Future<void> initDisk() async {
-    final client = RetryClient(http.Client());
+  Future<Disk> _getDisk() async {
+    Disk disk =
+        Disk(space: "", spacePercentage: 0.0, quota: "", availableQuota: 0.0);
 
+    final client = RetryClient(http.Client());
     try {
       final url = await URL().baseUrl;
       final jwt = await Util().getJWT();
 
-      var response = await client.get(
-          Uri.tryParse('$url/system/disk')!,
-          headers: jwt);
+      var response =
+          await client.get(Uri.tryParse('$url/system/disk')!, headers: jwt);
       print(response.body);
-      if(response.body.isNotEmpty && response.statusCode == 200) {
-        this.disk = Disk.fromJson(jsonDecode(response.body));
+      if (response.body.isNotEmpty && response.statusCode == 200) {
+        disk = Disk.fromJson(jsonDecode(response.body));
       }
     } finally {
       client.close();
     }
+
+    return disk;
   }
 
 /*
@@ -277,21 +292,19 @@ class Disk {
   String quota;
   double availableQuota;
 
-  Disk({
-    required this.space,
-    required this.spacePercentage,
-    required this.quota,
-    required this.availableQuota
-  });
-  
+  Disk(
+      {required this.space,
+      required this.spacePercentage,
+      required this.quota,
+      required this.availableQuota});
+
   factory Disk.fromJson(Map<String, dynamic> json) => _diskFromJson(json);
 }
 
 Disk _diskFromJson(Map<String, dynamic> json) {
   return Disk(
-      space: json["space"], 
+      space: json["space"],
       spacePercentage: json["spacePercentage"],
-      quota: json["quota"], 
-      availableQuota: json["availableQuota"]
-    );
+      quota: json["quota"],
+      availableQuota: json["availableQuota"]);
 }
