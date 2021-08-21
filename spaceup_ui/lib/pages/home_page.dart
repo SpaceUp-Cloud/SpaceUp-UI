@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   bool _authenticated = false;*/
 
   ScrollController scrollController = ScrollController();
+  var refreshKeyServerVersion = GlobalKey<RefreshIndicatorState>();
   var refreshKeyHostname = GlobalKey<RefreshIndicatorState>();
   var refreshKeyDisk = GlobalKey<RefreshIndicatorState>();
 
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   late int maxElementsPerLine;
 
   // System information
+  late Future<String> serverVersion;
   late Future<String> hostname;
   late Future<Disk> disk;
 
@@ -41,6 +43,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       hostname = _getHostname();
       disk = _getDisk();
+      serverVersion = _getServerVersion();
     });
 
     final Util util = Util();
@@ -115,6 +118,15 @@ class _HomePageState extends State<HomePage> {
               child: SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
                 controller: scrollController,
+                child: getServerVersionBuilder(),
+              ),
+              onRefresh: _getServerVersion,
+              key: refreshKeyServerVersion,
+            ),
+            RefreshIndicator(
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                controller: scrollController,
                 child: getHostnameBuilder(),
               ),
               onRefresh: _getHostname,
@@ -133,6 +145,20 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
+  Card createServerVersionCard(String version) {
+    return Card(
+      //margin: EdgeInsets.fromLTRB(10.0, 5.0, 0.0, 5.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ListTile(
+              leading: Icon(Icons.miscellaneous_services),
+              title: Text("Server version: " + version),
+            ),
+          ],
+        ));
+  }
+
   Card createHostnameCard(String hostname) {
     return Card(
         //margin: EdgeInsets.fromLTRB(10.0, 5.0, 0.0, 5.0),
@@ -145,6 +171,23 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     ));
+  }
+
+  FutureBuilder<String> getServerVersionBuilder() {
+    return FutureBuilder<String>(
+        future: serverVersion,
+        initialData: "",
+        builder: (context, AsyncSnapshot<String> snapshot) {
+          if (snapshot.hasData && snapshot.data != null) {
+            return createServerVersionCard(snapshot.data!);
+          } else if (snapshot.hasError) {
+            Util.showMessage(context, "${snapshot.error}");
+          }
+
+          return Center(
+            child: LinearProgressIndicator(),
+          );
+        });
   }
 
   FutureBuilder<String> getHostnameBuilder() {
@@ -213,6 +256,25 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  Future<String> _getServerVersion() async {
+    String serverVersion = "";
+
+    final client = RetryClient(http.Client());
+    try {
+      final url = await URL().baseUrl;
+      final jwt = await Util().getJWT();
+      var response =
+      await client.get(Uri.tryParse('$url/system/version')!, headers: jwt);
+      if (response.body.isNotEmpty && response.statusCode == 200) {
+        print(response.body);
+        serverVersion = response.body;
+      }
+    } finally {
+      client.close();
+    }
+    return serverVersion;
   }
 
   Future<String> _getHostname() async {
