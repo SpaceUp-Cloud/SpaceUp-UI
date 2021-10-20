@@ -2,9 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
-import 'package:spaceup_ui/pages/home_page.dart';
-import 'package:spaceup_ui/pages/login_page.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:universal_io/io.dart';
 
@@ -67,6 +66,14 @@ class Util {
 
   static Future<void> logout(BuildContext context) async {
     Settings().save("jwt", "");
+
+    bool rememberLogin = await Settings().getBool("rememberLogin", false);
+    if(!rememberLogin) {
+      Settings().save("server", "https://");
+      Settings().save("username", "");
+      Settings().save("password", "");
+    }
+
     //Navigator.of(context).popUntil(ModalRoute.withName(UIData.homeRoute));
     Navigator.of(context).pushNamedAndRemoveUntil(UIData.loginRoute, (route) => false);
     showMessage(context, "You have been logged out!");
@@ -76,6 +83,23 @@ class Util {
     //Navigator.of(context).popUntil(ModalRoute.withName(UIData.loginRoute));
     Navigator.of(context).pushNamedAndRemoveUntil(UIData.homeRoute, (route) => false);
     showMessage(context, "You have been logged in!");
+  }
+
+  static Future<void> checkJWT(BuildContext context) async {
+    final jwt = await Settings().getString("jwt", "");
+    try {
+      if(!JwtDecoder.isExpired(jwt)) {
+        // When are on the login page, we want to login
+        if(ModalRoute.of(context)!.settings.name == UIData.loginRoute) {
+          Util.login(context);
+        }
+      } else {
+        print("JWT is expired!");
+        Util.logout(context);
+      }
+    } catch(fe) {
+      print("Token is invalid");
+    }
   }
 }
 

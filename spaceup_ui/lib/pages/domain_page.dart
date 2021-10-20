@@ -28,6 +28,7 @@ class DomainPage extends State<DomainPageStarter> {
   @override
   void initState() {
     super.initState();
+    Util.checkJWT(context);
     domains = _getDomains(true);
 
     scrollController.addListener(() {

@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/retry.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
-import 'package:spaceup_ui/ui_data.dart';
 import 'package:http/http.dart' as http;
 import 'package:spaceup_ui/util.dart';
 
@@ -19,15 +17,15 @@ class _LoginState extends State<LoginPage>{
   final urlText = TextEditingController();
   final usernameText = TextEditingController();
   final passwordText = TextEditingController();
-  var rememberLogin = false;
+  late bool rememberLogin = false;
 
   late ThemeData theme;
 
   @override
   void initState() {
     super.initState();
+    Util.checkJWT(context);
     getUserSettings();
-    checkJWT(context);
   }
 
   @override
@@ -145,23 +143,18 @@ class _LoginState extends State<LoginPage>{
     }
   }
 
-  Future<void> checkJWT(BuildContext context) async {
-    final jwt = await Settings().getString("jwt", "");
-    try {
-      if(!JwtDecoder.isExpired(jwt)) {
-        Util.login(context);
-      } else {
-        print("JWT is expired!");
-      }
-    } catch(fe) {
-      print("Token is invalid");
-    }
-  }
+
 
   Future<void> getUserSettings() async {
-    rememberLogin = await Settings().getBool("rememberLogin", false);
+    bool isrememberLogin = await Settings().getBool("rememberLogin", false);
+    print("Remember login: $isrememberLogin}");
 
-    if(rememberLogin) {
+    setState(() {
+      rememberLogin = isrememberLogin;
+    });
+
+
+    if(isrememberLogin) {
       urlText.text = await Settings().getString("server", "https://");
       usernameText.text = await Settings().getString("username", "");
       passwordText.text = await Settings().getString("password", "");

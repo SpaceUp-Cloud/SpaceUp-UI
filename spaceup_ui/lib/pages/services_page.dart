@@ -25,6 +25,7 @@ class ServicesPage extends State<ServicesPageStarter> {
   @override
   void initState() {
     super.initState();
+    Util.checkJWT(context);
     services = _getServices();
   }
 
