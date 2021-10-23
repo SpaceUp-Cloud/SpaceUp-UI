@@ -2,14 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 //import 'package:local_auth/local_auth.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/pages/domain_page.dart';
 import 'package:spaceup_ui/pages/home_page.dart';
 import 'package:spaceup_ui/pages/login_page.dart';
 import 'package:spaceup_ui/pages/services_page.dart';
 import 'package:spaceup_ui/pages/settings_page.dart';
-import 'package:spaceup_ui/ui_data.dart';
-import 'package:spaceup_ui/util.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,15 +24,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Colors.teal,
-          accentColor: Colors.teal.shade300,
-          primarySwatch: Colors.deepOrange
+          primarySwatch: Colors.teal,
+          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal,
+              brightness: Brightness.light)
+              .copyWith(secondary: Colors.teal.shade300)
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Colors.teal.shade700,
-        accentColor: Colors.teal.shade500,
         primaryColorDark: Colors.white,
         primarySwatch: Colors.teal,
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal,
+            brightness: Brightness.dark)
+            .copyWith(secondary: Colors.teal.shade500),
       ),
       //home: LoginPage(),
       initialRoute: '/',
