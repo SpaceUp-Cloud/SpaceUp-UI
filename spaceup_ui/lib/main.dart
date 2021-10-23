@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-//import 'package:local_auth/local_auth.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:spaceup_ui/pages/domain_page.dart';
 import 'package:spaceup_ui/pages/home_page.dart';
