@@ -24,6 +24,7 @@ class _LoginState extends State<LoginPage>{
   @override
   void initState() {
     super.initState();
+    Util.checkJWT(context);
     getUserSettings();
   }
 
@@ -146,7 +147,7 @@ class _LoginState extends State<LoginPage>{
 
   Future<void> getUserSettings() async {
     bool isrememberLogin = await Settings().getBool("rememberLogin", false);
-    print("Remember login: $isrememberLogin}");
+    print("Remember login: $isrememberLogin");
 
     setState(() {
       rememberLogin = isrememberLogin;

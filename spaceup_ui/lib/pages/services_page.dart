@@ -6,6 +6,7 @@ import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
+import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
@@ -20,6 +21,7 @@ class ServicesPage extends State<ServicesPageStarter> {
   ScrollController scrollController = ScrollController();
   FlipCardController flipCardController = new FlipCardController();
   var refreshKey = GlobalKey<RefreshIndicatorState>();
+  late Timer _timer;
 
   late ThemeData theme;
 
@@ -31,11 +33,13 @@ class ServicesPage extends State<ServicesPageStarter> {
     Util.checkJWT(context);
     services = _getServices();
 
-    /*flipCardController.hint(
-      duration: Duration(seconds: 1),
-      total: Duration(seconds: 1),
-    );*/
-    flipCardController.toggleCard();
+    _refreshView();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer.cancel();
   }
 
   @override
@@ -90,8 +94,8 @@ class ServicesPage extends State<ServicesPageStarter> {
         });
   }
 
-  List<FlipCard> createCards(List<Service> services) {
-    var cards = <FlipCard>[];
+  List<Card> createCards(List<Service> services) {
+    var cards = <Card>[];
     if (services.isEmpty) return cards;
 
     services.forEach((service) {
@@ -106,7 +110,7 @@ class ServicesPage extends State<ServicesPageStarter> {
               primary: Colors.white
           ),
           child: const Text(
-            'Logs', /*style: TextStyle(fontSize: 18),*/
+            'Show Logs', /*style: TextStyle(fontSize: 18),*/
           ),
           onPressed: () {
             _doServiceAction(service.name, "Logs");
@@ -177,12 +181,26 @@ class ServicesPage extends State<ServicesPageStarter> {
                     crossAxisCount: actionButtons.length,
                     children: actionButtons
                 )
+                /*GridView.builder(
+                    itemCount: actionButtons.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2
+                    ),
+                    itemBuilder: (context, index) {
+                      return Container(
+                        child: actionButtons[index],
+                      );
+                    })*/
 
               ],
             ),
           )
       );
-      cards.add(card);
+      cards.add(
+          Card(
+            margin: EdgeInsets.only(top: 2.5, bottom: 1.25),
+            child: card,
+      ));
     });
 
     return cards;
@@ -198,6 +216,7 @@ class ServicesPage extends State<ServicesPageStarter> {
       var jwt = await Util().getJWT();
       var response =
           await client.get(Uri.tryParse('$url/service/list')!, headers: jwt);
+      print(response.body);
       if (response.statusCode == 200) {
         services = _parseServices(response.body);
       }
@@ -215,14 +234,37 @@ class ServicesPage extends State<ServicesPageStarter> {
       var jwt = await Util().getJWT();
       var uri = Uri.tryParse('$url/service/execute/$servicename/$action');
       var response = await client.post(uri!, headers: jwt);
-      if (response.body.isNotEmpty) {
+      print(response.body);
+      if (response.statusCode != 200) {
+        print(response.body);
+        Util.showMessage(context, response.body);
+      } else if (response.body.isNotEmpty && response.statusCode == 200) {
         Util.showFeedback(context, response.body);
         _onRefresh();
-      } else if (response.statusCode != 400) {
-        Util.showMessage(context, response.body);
       }
     } finally {
       client.close();
+    }
+  }
+
+  Future<void> _refreshView() async {
+    bool refreshView = await Settings().getBool("refreshView", true);
+
+    if(refreshView) {
+      print("Initialize view refresher");
+      _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+        setState(() {
+          services = _getServices();
+        });
+      });
+    } else {
+      try {
+        if(_timer.isActive) {
+          _timer.cancel();
+        }
+      } catch(e) {
+        print("View refresh timer is not initialized");
+      }
     }
   }
 

@@ -23,7 +23,7 @@ class SettingsPage extends State<SettingsPageStarter> {
     final Util util = Util();
 
     final submenus = <Widget>[];
-    if(util.isMobile) {
+    if (util.isMobile) {
       // ... mobile specific
       submenus.add(
           SettingsTileGroup(
@@ -35,20 +35,26 @@ class SettingsPage extends State<SettingsPageStarter> {
                 settingKey: "fingerprint_enabled",
                 defaultValue: false,
               ),
+              SwitchSettingsTile(
+                settingKey: 'refreshView',
+                icon: Icon(Icons.refresh),
+                title: 'Automatically refresh views',
+                defaultValue: true,
+              ),
               SettingsTileGroup(
                 title: 'Theme',
                 children: [
                   RadioSettingsTile(
-                      icon: Icon(Icons.wb_sunny),
-                      defaultKey: 'system',
-                      settingKey: 'themeMode',
-                      expandable: true,
-                      title: 'Theme mode',
-                      values: {
-                        'system': 'System mode',
-                        'light': 'Light mode',
-                        'dark': 'Dark mode'
-                      },
+                    icon: Icon(Icons.wb_sunny),
+                    defaultKey: 'system',
+                    settingKey: 'themeMode',
+                    expandable: true,
+                    title: 'Theme mode',
+                    values: {
+                      'system': 'System mode',
+                      'light': 'Light mode',
+                      'dark': 'Dark mode'
+                    },
                   ),
                   ThemeSwitcher(
                     clipper: ThemeSwitcherBoxClipper(),
@@ -56,7 +62,8 @@ class SettingsPage extends State<SettingsPageStarter> {
                       return OutlinedButton(
                         child: Text('Apply Theme'),
                         onPressed: () {
-                          Future.delayed(Duration(microseconds: 500), () => changeTheme(context));
+                          Future.delayed(Duration(microseconds: 500), () =>
+                              changeTheme(context));
                         },
                       );
                     },
@@ -69,7 +76,7 @@ class SettingsPage extends State<SettingsPageStarter> {
           )
       );
     }
-    if(util.isWeb) {
+    if (util.isWeb) {
       // ... web specific
     }
 
@@ -78,7 +85,7 @@ class SettingsPage extends State<SettingsPageStarter> {
     }*/
 
     // Das not work yet on desktop but web
-    if(!util.isDesktop || util.isWeb) {
+    if (!util.isDesktop || util.isWeb) {
       /*submenus.add(SimpleSettingsTile(
         title: "Advanced",
         screen:
@@ -110,11 +117,11 @@ class SettingsPage extends State<SettingsPageStarter> {
       );
     }
 
-    if(util.isDesktop && !util.isWeb){
+    if (util.isDesktop && !util.isWeb) {
       submenus.add(
-        SettingsContainer(
-          child: Text("Does not work yet on desktop."),
-        )
+          SettingsContainer(
+            child: Text("Does not work yet on desktop."),
+          )
       );
     }
 
@@ -128,8 +135,8 @@ class SettingsPage extends State<SettingsPageStarter> {
 
     return ThemeSwitchingArea(
         child: Scaffold(
-        body: settingsList
-    ));
+            body: settingsList
+        ));
   }
 
   Future<void> changeTheme(BuildContext context) async {
@@ -142,7 +149,7 @@ class SettingsPage extends State<SettingsPageStarter> {
     WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
         ? ThemeConfig.darkMode : ThemeConfig.lightMode;
 
-    if(themeMode == 'system') {
+    if (themeMode == 'system') {
       ThemeSwitcher.of(context)!.changeTheme(
           theme: systemMode
       );

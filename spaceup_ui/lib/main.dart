@@ -1,6 +1,7 @@
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/pages/domain_page.dart';
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
       initTheme: themeData,
       builder: (_, myTheme) {
         print("Theme mode: ${myTheme!.brightness}");
-        return MaterialApp(
+        return GetMaterialApp(
           title: 'SpaceUp Client',
           debugShowCheckedModeBanner: false,
           theme: myTheme,

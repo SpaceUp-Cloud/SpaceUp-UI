@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
+import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
@@ -23,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   var refreshKeyServerVersion = GlobalKey<RefreshIndicatorState>();
   var refreshKeyHostname = GlobalKey<RefreshIndicatorState>();
   var refreshKeyDisk = GlobalKey<RefreshIndicatorState>();
+  late Timer _timer;
 
   var profiles = <String>[];
   var activeProfile = "";
@@ -55,6 +58,14 @@ class _HomePageState extends State<HomePage> {
     } else {
       maxElementsPerLine = 2;
     }
+
+    _refreshView();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer.cancel();
   }
 
   @override
@@ -317,6 +328,28 @@ class _HomePageState extends State<HomePage> {
     }
 
     return disk;
+  }
+
+  Future<void> _refreshView() async {
+    bool refreshView = await Settings().getBool("refreshView", true);
+
+    if(refreshView) {
+      print("Initialize view refresher");
+      _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+        setState(() {
+          disk = _getDisk();
+          serverVersion = _getServerVersion();
+        });
+      });
+    } else {
+      try {
+        if(_timer.isActive) {
+          _timer.cancel();
+        }
+      } catch(e) {
+        print("View refresh timer is not initialized");
+      }
+    }
   }
 
 /*

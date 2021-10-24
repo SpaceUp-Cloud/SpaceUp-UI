@@ -2,8 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/pages/home_page.dart';
+import 'package:spaceup_ui/pages/login_page.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:universal_io/io.dart';
 
@@ -75,13 +78,14 @@ class Util {
     }
 
     //Navigator.of(context).popUntil(ModalRoute.withName(UIData.homeRoute));
-    Navigator.of(context).pushNamedAndRemoveUntil(UIData.loginRoute, (route) => false);
+    //Navigator.of(context).pushNamedAndRemoveUntil(UIData.loginRoute, (route) => false);
+    Get.offAll(() => LoginPage());
     showMessage(context, "You have been logged out!");
   }
 
   static Future<void> login(BuildContext context) async {
-    //Navigator.of(context).popUntil(ModalRoute.withName(UIData.loginRoute));
-    Navigator.of(context).pushNamedAndRemoveUntil(UIData.homeRoute, (route) => false);
+    //Navigator.of(context).pushNamedAndRemoveUntil(UIData.homeRoute, (route) => false);
+    Get.offAll(() => HomePage("Home"));
     showMessage(context, "You have been logged in!");
   }
 
@@ -90,7 +94,9 @@ class Util {
     try {
       if(!JwtDecoder.isExpired(jwt)) {
         // When are on the login page, we want to login
-        if(ModalRoute.of(context)!.settings.name == UIData.loginRoute) {
+        var currentRoute = Get.currentRoute;
+        print(currentRoute);
+        if(currentRoute == UIData.loginRoute || currentRoute == "") {
           Util.login(context);
         }
       } else {

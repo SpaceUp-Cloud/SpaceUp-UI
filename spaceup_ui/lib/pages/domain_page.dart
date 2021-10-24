@@ -20,6 +20,7 @@ class DomainPageStarter extends StatefulWidget {
 class DomainPage extends State<DomainPageStarter> {
   ScrollController scrollController = ScrollController();
   var refreshKey = GlobalKey<RefreshIndicatorState>();
+  late Timer _timer;
 
   bool fabIsVisible = true;
 
@@ -37,6 +38,14 @@ class DomainPage extends State<DomainPageStarter> {
             ScrollDirection.forward;
       });
     });
+
+    _refreshView();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer.cancel();
   }
 
   @override
@@ -263,6 +272,7 @@ class DomainPage extends State<DomainPageStarter> {
       var getDomainsUrl = "$url/domain/list?cached=$isCached";
       var response =
           await client.get(Uri.tryParse(getDomainsUrl)!, headers: jwt);
+      print(response.body);
       if (response.statusCode == 200) {
         domains = _parseDomains(response.body);
       }
@@ -270,6 +280,27 @@ class DomainPage extends State<DomainPageStarter> {
       client.close();
     }
     return domains;
+  }
+
+  Future<void> _refreshView() async {
+    bool refreshView = await Settings().getBool("refreshView", true);
+
+    if(refreshView) {
+      print("Initialize view refresher");
+      _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+        setState(() {
+          domains = _getDomains(true);
+        });
+      });
+    } else {
+      try {
+        if(_timer.isActive) {
+          _timer.cancel();
+        }
+      } catch(e) {
+        print("View refresh timer is not initialized");
+      }
+    }
   }
 
   List<Domain> _parseDomains(String body) {
