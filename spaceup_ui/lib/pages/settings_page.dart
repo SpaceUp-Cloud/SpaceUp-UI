@@ -1,7 +1,9 @@
 import 'dart:io' show Platform;
 
+import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
 class SettingsPageStarter extends StatefulWidget {
@@ -24,15 +26,45 @@ class SettingsPage extends State<SettingsPageStarter> {
     if(util.isMobile) {
       // ... mobile specific
       submenus.add(
-          SettingsContainer(
+          SettingsTileGroup(
+            title: 'App',
             children: [
-              Text("App"),
               SwitchSettingsTile(
                 title: 'Fingerprint enabled',
                 icon: Icon(Icons.fingerprint),
                 settingKey: "fingerprint_enabled",
                 defaultValue: false,
+              ),
+              SettingsTileGroup(
+                title: 'Theme',
+                children: [
+                  RadioSettingsTile(
+                      icon: Icon(Icons.wb_sunny),
+                      defaultKey: 'system',
+                      settingKey: 'themeMode',
+                      expandable: true,
+                      title: 'Theme mode',
+                      values: {
+                        'system': 'System mode',
+                        'light': 'Light mode',
+                        'dark': 'Dark mode'
+                      },
+                  ),
+                  ThemeSwitcher(
+                    clipper: ThemeSwitcherBoxClipper(),
+                    builder: (context) {
+                      return OutlinedButton(
+                        child: Text('Apply Theme'),
+                        onPressed: () {
+                          changeTheme(context);
+                        },
+                      );
+                    },
+                  )
+                ],
+
               )
+
             ],
           )
       );
@@ -51,23 +83,23 @@ class SettingsPage extends State<SettingsPageStarter> {
         title: "Advanced",
         screen:
       ));*/
-      submenus.add(
+      /*submenus.add(
         SettingsContainer(
           children: [
-            Text("Profiles"),
+            /*Text("Profiles"),
             TextFieldModalSettingsTile(
                 settingKey: "profiles",
                 title: "Profiles",
                 subtitle: "Separate by semicolon.",
                 keyboardType: TextInputType.multiline,
-            )
+            )*/
           ],
         )
-      );
+      );*/
       submenus.add(
-          SettingsContainer(
+          SettingsTileGroup(
+            title: 'Behaviour',
             children: [
-              Text("Domains"),
               SwitchSettingsTile(
                 title: 'Cached Domains',
                 settingKey: "isCachedDomain",
@@ -94,9 +126,35 @@ class SettingsPage extends State<SettingsPageStarter> {
       children: submenus,
     );
 
-    return Scaffold(
+    return ThemeSwitchingArea(
+        child: Scaffold(
         body: settingsList
-    );
+    ));
+  }
+
+  Future<void> changeTheme(BuildContext context) async {
+    String themeMode = await Settings().getString("themeMode", "system");
+    print("Change theme $themeMode");
+
+    final lightMode = ThemeConfig.lightMode;
+    final darkMode = ThemeConfig.darkMode;
+    final systemMode =
+    WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
+        ? ThemeConfig.darkMode : ThemeConfig.lightMode;
+
+    if(themeMode == 'system') {
+      ThemeSwitcher.of(context)!.changeTheme(
+          theme: systemMode
+      );
+    } else if (themeMode == 'dark') {
+      ThemeSwitcher.of(context)!.changeTheme(
+          theme: darkMode
+      );
+    } else {
+      ThemeSwitcher.of(context)!.changeTheme(
+          theme: lightMode
+      );
+    }
   }
 
 }

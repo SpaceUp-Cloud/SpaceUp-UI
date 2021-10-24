@@ -92,7 +92,7 @@ class ServicesPage extends State<ServicesPageStarter> {
               leading: Icon(Icons.miscellaneous_services),
               title: Text(service.name),
               tileColor: (service.status == "FATAL" || service.status == "STOPPED")
-                  ? theme.errorColor : theme.accentColor,
+                  ? theme.errorColor : theme.colorScheme.secondary,
               subtitle: Text(service.info),
               //onTap: _openLogs(),
             ),

@@ -24,7 +24,6 @@ class _LoginState extends State<LoginPage>{
   @override
   void initState() {
     super.initState();
-    Util.checkJWT(context);
     getUserSettings();
   }
 
@@ -78,7 +77,7 @@ class _LoginState extends State<LoginPage>{
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: MaterialButton(
                   textColor: Colors.white,
-                  color: theme.accentColor,
+                  color: theme.colorScheme.secondary,
                   child: Text('Login'),
                   onPressed: _login
                 )),
