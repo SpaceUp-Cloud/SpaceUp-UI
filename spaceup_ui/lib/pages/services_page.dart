@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
@@ -34,9 +35,11 @@ class ServicesPage extends State<ServicesPageStarter> {
     theme = Theme.of(context);
 
     final servicesView = SingleChildScrollView(
-      physics: AlwaysScrollableScrollPhysics(),
-      controller: scrollController,
-      child: createServicCards()
+        physics: AlwaysScrollableScrollPhysics(),
+        controller: scrollController,
+        child: Container(
+          child: createServicCards(),
+        )
     );
 
     final scaffold = Scaffold(
@@ -46,9 +49,7 @@ class ServicesPage extends State<ServicesPageStarter> {
       body: Stack(
         children: [
           RefreshIndicator(
-              child: servicesView,
-              onRefresh: _onRefresh,
-              key: refreshKey)
+              child: servicesView, onRefresh: _onRefresh, key: refreshKey)
         ],
       ),
     );
@@ -81,46 +82,65 @@ class ServicesPage extends State<ServicesPageStarter> {
         });
   }
 
-  List<Card> createCards(List<Service> services) {
-    var cards = <Card>[];
+  List<FlipCard> createCards(List<Service> services) {
+    var cards = <FlipCard>[];
     if (services.isEmpty) return cards;
 
     services.forEach((service) {
-      var card = Card(
-          child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+      var card = FlipCard(
+          fill: Fill.fillBack,
+          direction: FlipDirection.VERTICAL,
+          front: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
             ListTile(
               leading: Icon(Icons.miscellaneous_services),
               title: Text(service.name),
-              tileColor: (service.status == "FATAL" || service.status == "STOPPED")
-                  ? theme.errorColor : theme.colorScheme.secondary,
-              subtitle: Text(service.info),
+              tileColor:
+                  (service.status == "FATAL" || service.status == "STOPPED")
+                      ? theme.errorColor
+                      : theme.colorScheme.secondary,
+              subtitle: Text(service.info,),
               //onTap: _openLogs(),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                // START, STOP, RESTART, ...more
-                TextButton(
-                  child: const Text('Start', /*style: TextStyle(fontSize: 18),*/),
-                  onPressed: () {
-                    _doServiceAction(service.name, "START");
-                  },
+          ]),
+          back: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              // START, STOP, RESTART, ...more
+              TextButton(
+                style: TextButton.styleFrom(
+                  primary: Colors.white
                 ),
-                TextButton(
-                  child: const Text('Stop', /*style: TextStyle(fontSize: 18),*/),
-                  onPressed: () {
-                    _doServiceAction(service.name, "STOP");
-                  },
+                child: const Text(
+                  'Start', /*style: TextStyle(fontSize: 18),*/
                 ),
-                TextButton(
-                  child: const Text('Restart', /*style: TextStyle(fontSize: 18),*/),
-                  onPressed: () {
-                    _doServiceAction(service.name, "RESTART");
-                  },
+                onPressed: () {
+                  _doServiceAction(service.name, "START");
+                },
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                    primary: Colors.white
                 ),
-              ],
-            )
-          ]));
+                child: const Text(
+                  'Stop', /*style: TextStyle(fontSize: 18),*/
+                ),
+                onPressed: () {
+                  _doServiceAction(service.name, "STOP");
+                },
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                    primary: Colors.white
+                ),
+                child: const Text(
+                  'Restart', /*style: TextStyle(fontSize: 18),*/
+                ),
+                onPressed: () {
+                  _doServiceAction(service.name, "RESTART");
+                },
+              ),
+            ],
+          ));
       cards.add(card);
     });
 
@@ -135,8 +155,8 @@ class ServicesPage extends State<ServicesPageStarter> {
     try {
       var url = await URL().baseUrl;
       var jwt = await Util().getJWT();
-      var response = await client
-          .get(Uri.tryParse('$url/service/list')!, headers: jwt);
+      var response =
+          await client.get(Uri.tryParse('$url/service/list')!, headers: jwt);
       if (response.statusCode == 200) {
         domains = _parseServices(response.body);
       }
@@ -153,8 +173,8 @@ class ServicesPage extends State<ServicesPageStarter> {
       var url = await URL().baseUrl;
       var jwt = await Util().getJWT();
       var uri = Uri.tryParse('$url/service/execute/$servicename/$action');
-      var response  = await client.post(uri!, headers: jwt);
-      if(response.body.isNotEmpty) {
+      var response = await client.post(uri!, headers: jwt);
+      if (response.body.isNotEmpty) {
         Util.showFeedback(context, response.body);
         _onRefresh();
       }
@@ -167,7 +187,6 @@ class ServicesPage extends State<ServicesPageStarter> {
     final parsed = json.decode(body).cast<Map<String, dynamic>>();
     return parsed.map<Service>((json) => Service.fromJson(json)).toList();
   }
-
 }
 
 /// DTO part
@@ -176,14 +195,9 @@ class Service {
   String status;
   String info;
 
-  Service({
-    required this.name,
-    required this.status,
-    required this.info
-  });
+  Service({required this.name, required this.status, required this.info});
 
-  factory Service.fromJson(Map<String, dynamic> json)
-    => _serviceFromJson(json);
+  factory Service.fromJson(Map<String, dynamic> json) => _serviceFromJson(json);
 }
 
 Service _serviceFromJson(Map<String, dynamic> json) {

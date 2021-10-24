@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
-import 'package:spaceup_ui/util.dart';
 import 'package:spaceup_ui/ui_data.dart';
+import 'package:spaceup_ui/util.dart';
 
 class DomainPageStarter extends StatefulWidget {
   DomainPageStarter() : super();
@@ -82,18 +82,20 @@ class DomainPage extends State<DomainPageStarter> {
     });
   }
 
-  List<Card> createCards(List<Domain> domains) {
-    var cards = <Card>[];
+  List<FlipCard> createCards(List<Domain> domains) {
+    var cards = <FlipCard>[];
     if (domains.isEmpty) return cards;
 
     domains.forEach((domain) {
-      var card = Card(
-          child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-        ListTile(
-          leading: Icon(Icons.cloud),
-          title: Text(domain.url),
-        ),
-        Row(
+      var card = FlipCard(
+        direction: FlipDirection.VERTICAL,
+        front: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          ListTile(
+            leading: Icon(Icons.cloud),
+            title: Text(domain.url),
+          ),
+        ]),
+        back: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             TextButton(
@@ -102,10 +104,9 @@ class DomainPage extends State<DomainPageStarter> {
                 _deleteDomainDialog(domain);
               },
             ),
-              const SizedBox(width: 4),
-            ],
-          ),
-        ])
+            const SizedBox(width: 4),
+          ],
+        ),
       );
       cards.add(card);
     });
@@ -128,7 +129,7 @@ class DomainPage extends State<DomainPageStarter> {
 
           // By default, show a loading spinner.
           return Center(
-            child:  LinearProgressIndicator(),
+            child: LinearProgressIndicator(),
           );
         });
   }
@@ -180,8 +181,7 @@ class DomainPage extends State<DomainPageStarter> {
                     textInputAction: TextInputAction.go,
                     keyboardType: TextInputType.multiline,
                     decoration: InputDecoration(
-                      hintText: "Add here... x.y.z; a.b.c; ..."
-                    ),
+                        hintText: "Add here... x.y.z; a.b.c; ..."),
                   )
                 ],
               ),
@@ -214,7 +214,7 @@ class DomainPage extends State<DomainPageStarter> {
       var jwt = await Util().getJWT();
       var response = await client.delete(uri!, headers: jwt);
 
-      if(response.body.isNotEmpty && response.statusCode == 200) {
+      if (response.body.isNotEmpty && response.statusCode == 200) {
         Util.showFeedback(context, response.body);
         _refreshDomains();
       }
@@ -222,7 +222,7 @@ class DomainPage extends State<DomainPageStarter> {
       client.close();
     }
   }
-  
+
   Future<void> _addDomain(String domain) async {
     final httpClient = http.Client();
     final client = RetryClient(httpClient);
@@ -238,12 +238,10 @@ class DomainPage extends State<DomainPageStarter> {
       var url = await URL().baseUrl;
       var jwt = await Util().getJWT();
       var addDomainUrl = Uri.tryParse('$url/domain/add');
-      var response = await client.post(
-          addDomainUrl!,
-          headers: jwt,
-          body: json.encode(domains));
+      var response = await client.post(addDomainUrl!,
+          headers: jwt, body: json.encode(domains));
 
-      if(response.body.isNotEmpty && response.statusCode == 200) {
+      if (response.body.isNotEmpty && response.statusCode == 200) {
         Util.showFeedback(context, response.body);
         _refreshDomains();
       }
@@ -256,14 +254,15 @@ class DomainPage extends State<DomainPageStarter> {
     var domains = <Domain>[];
     final httpClient = http.Client();
     final client = RetryClient(httpClient);
-    var isCached = await Settings().getBool("isCachedDomain", false) && useCached;
+    var isCached =
+        await Settings().getBool("isCachedDomain", false) && useCached;
 
     try {
       var url = await URL().baseUrl;
       var jwt = await Util().getJWT();
       var getDomainsUrl = "$url/domain/list?cached=$isCached";
-      var response = await client
-          .get(Uri.tryParse(getDomainsUrl)!, headers: jwt);
+      var response =
+          await client.get(Uri.tryParse(getDomainsUrl)!, headers: jwt);
       if (response.statusCode == 200) {
         domains = _parseDomains(response.body);
       }
@@ -277,7 +276,6 @@ class DomainPage extends State<DomainPageStarter> {
     final parsed = json.decode(body).cast<Map<String, dynamic>>();
     return parsed.map<Domain>((json) => Domain.fromJson(json)).toList();
   }
-
 }
 
 class Domain {
