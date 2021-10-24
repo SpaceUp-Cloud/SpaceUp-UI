@@ -96,6 +96,22 @@ class ServicesPage extends State<ServicesPageStarter> {
 
     services.forEach((service) {
       var actionButtons = [
+        ListTile(
+          //leading: Icon(Icons.miscellaneous_services),
+          title: Text(service.name),
+          //onTap: _openLogs(),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+              primary: Colors.white
+          ),
+          child: const Text(
+            'Logs', /*style: TextStyle(fontSize: 18),*/
+          ),
+          onPressed: () {
+            _doServiceAction(service.name, "Logs");
+          },
+        ),
         TextButton(
           style: TextButton.styleFrom(
               primary: Colors.white
@@ -150,21 +166,17 @@ class ServicesPage extends State<ServicesPageStarter> {
           ]),
           back: ColoredBox(
             color: (service.status == "FATAL" || service.status == "STOPPED")
-              ? theme.errorColor
-              : theme.colorScheme.secondary,
-            child: Column(
-              //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                ListTile(
-                    leading: Icon(Icons.miscellaneous_services),
-                    title: Text(service.name),
-                    // START, STOP, RESTART, ...more
-                    trailing: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
-                      children: actionButtons,
-                    ),
-                ),
+                ? theme.errorColor
+                : theme.colorScheme.secondary,
+            child: ListView(
+              //crossAxisAlignment: CrossAxisAlignment.end,
+              //mainAxisSize: MainAxisSize.min,
+              children: [
+                GridView.count(
+                    shrinkWrap: true,
+                    crossAxisCount: actionButtons.length,
+                    children: actionButtons
+                )
 
               ],
             ),
@@ -206,6 +218,8 @@ class ServicesPage extends State<ServicesPageStarter> {
       if (response.body.isNotEmpty) {
         Util.showFeedback(context, response.body);
         _onRefresh();
+      } else if (response.statusCode != 400) {
+        Util.showMessage(context, response.body);
       }
     } finally {
       client.close();
