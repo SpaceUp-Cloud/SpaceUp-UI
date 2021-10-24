@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flip_card/flip_card.dart';
+import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
@@ -17,6 +18,7 @@ class ServicesPageStarter extends StatefulWidget {
 
 class ServicesPage extends State<ServicesPageStarter> {
   ScrollController scrollController = ScrollController();
+  FlipCardController flipCardController = new FlipCardController();
   var refreshKey = GlobalKey<RefreshIndicatorState>();
 
   late ThemeData theme;
@@ -28,6 +30,12 @@ class ServicesPage extends State<ServicesPageStarter> {
     super.initState();
     Util.checkJWT(context);
     services = _getServices();
+
+    /*flipCardController.hint(
+      duration: Duration(seconds: 1),
+      total: Duration(seconds: 1),
+    );*/
+    flipCardController.toggleCard();
   }
 
   @override
@@ -87,60 +95,81 @@ class ServicesPage extends State<ServicesPageStarter> {
     if (services.isEmpty) return cards;
 
     services.forEach((service) {
+      var actionButtons = [
+        TextButton(
+          style: TextButton.styleFrom(
+              primary: Colors.white
+          ),
+          child: const Text(
+            'Start', /*style: TextStyle(fontSize: 18),*/
+          ),
+          onPressed: () {
+            _doServiceAction(service.name, "START");
+          },
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+              primary: Colors.white
+          ),
+          child: const Text(
+            'Stop', /*style: TextStyle(fontSize: 18),*/
+          ),
+          onPressed: () {
+            _doServiceAction(service.name, "STOP");
+          },
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+              primary: Colors.white
+          ),
+          child: const Text(
+            'Restart', /*style: TextStyle(fontSize: 18),*/
+          ),
+          onPressed: () {
+            _doServiceAction(service.name, "RESTART");
+          },
+        )
+      ];
+
       var card = FlipCard(
           fill: Fill.fillBack,
+          controller: flipCardController,
           direction: FlipDirection.VERTICAL,
-          front: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.miscellaneous_services),
-              title: Text(service.name),
-              tileColor:
-                  (service.status == "FATAL" || service.status == "STOPPED")
-                      ? theme.errorColor
-                      : theme.colorScheme.secondary,
-              subtitle: Text(service.info,),
-              //onTap: _openLogs(),
-            ),
+          front: Column(children: <Widget>[
+            ColoredBox(
+              color: (service.status == "FATAL" || service.status == "STOPPED")
+                  ? theme.errorColor
+                  : theme.colorScheme.secondary,
+              child: ListTile(
+                leading: Icon(Icons.miscellaneous_services),
+                title: Text(service.name),
+                subtitle: Text(service.info,),
+                //onTap: _openLogs(),
+              ),
+            )
           ]),
-          back: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              // START, STOP, RESTART, ...more
-              TextButton(
-                style: TextButton.styleFrom(
-                  primary: Colors.white
+          back: ColoredBox(
+            color: (service.status == "FATAL" || service.status == "STOPPED")
+              ? theme.errorColor
+              : theme.colorScheme.secondary,
+            child: Column(
+              //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                ListTile(
+                    leading: Icon(Icons.miscellaneous_services),
+                    title: Text(service.name),
+                    // START, STOP, RESTART, ...more
+                    trailing: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: actionButtons,
+                    ),
                 ),
-                child: const Text(
-                  'Start', /*style: TextStyle(fontSize: 18),*/
-                ),
-                onPressed: () {
-                  _doServiceAction(service.name, "START");
-                },
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                    primary: Colors.white
-                ),
-                child: const Text(
-                  'Stop', /*style: TextStyle(fontSize: 18),*/
-                ),
-                onPressed: () {
-                  _doServiceAction(service.name, "STOP");
-                },
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                    primary: Colors.white
-                ),
-                child: const Text(
-                  'Restart', /*style: TextStyle(fontSize: 18),*/
-                ),
-                onPressed: () {
-                  _doServiceAction(service.name, "RESTART");
-                },
-              ),
-            ],
-          ));
+
+              ],
+            ),
+          )
+      );
       cards.add(card);
     });
 
@@ -148,7 +177,7 @@ class ServicesPage extends State<ServicesPageStarter> {
   }
 
   Future<List<Service>> _getServices() async {
-    var domains = <Service>[];
+    var services = <Service>[];
     final httpClient = http.Client();
     final client = RetryClient(httpClient);
 
@@ -158,12 +187,12 @@ class ServicesPage extends State<ServicesPageStarter> {
       var response =
           await client.get(Uri.tryParse('$url/service/list')!, headers: jwt);
       if (response.statusCode == 200) {
-        domains = _parseServices(response.body);
+        services = _parseServices(response.body);
       }
     } finally {
       client.close();
     }
-    return domains;
+    return services;
   }
 
   Future<void> _doServiceAction(String servicename, String action) async {
