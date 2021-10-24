@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
           title: 'SpaceUp Client',
           debugShowCheckedModeBanner: false,
           theme: myTheme,
-          //home: LoginPage(),
+          home: LoginPage(),
           initialRoute: '/',
           onGenerateRoute: (RouteSettings settings) {
             switch (settings.name) {

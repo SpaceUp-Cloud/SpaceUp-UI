@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
@@ -88,13 +89,13 @@ class _HomePageState extends State<HomePage> {
               ListTile(
                 title: Text("Domains"),
                 onTap: () {
-                  Navigator.pushNamed(context, UIData.domainsRoute);
+                  Get.toNamed(UIData.domainsRoute);
                 },
               ),
               ListTile(
                 title: Text("Services"),
                 onTap: () {
-                  Navigator.pushNamed(context, UIData.servicesRoute);
+                  Get.toNamed(UIData.servicesRoute);
                 },
               ),
               Divider(
@@ -103,13 +104,13 @@ class _HomePageState extends State<HomePage> {
               ListTile(
                 title: Text('Settings'),
                 onTap: () {
-                  Navigator.pushNamed(context, UIData.settingsRoute);
+                  Get.toNamed(UIData.settingsRoute);
                 },
               ),
               ListTile(
                 title: Text('About'),
                 onTap: () {
-                  Navigator.pop(context);
+                  Get.back();
                 },
               ),
               Divider(

@@ -59,7 +59,9 @@ class DomainPage extends State<DomainPageStarter> {
     final scrollCardsView = SingleChildScrollView(
       physics: AlwaysScrollableScrollPhysics(),
       controller: scrollController,
-      child: createDomainCards(),
+      child: Container(
+        child: createDomainCards(),
+      ),
     );
 
     final scaffold = Scaffold(
@@ -287,9 +289,9 @@ class DomainPage extends State<DomainPageStarter> {
 
     if(refreshView) {
       print("Initialize view refresher");
-      _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      _timer = Timer.periodic(Duration(seconds: 30), (timer) {
         setState(() {
-          domains = _getDomains(true);
+          domains = _getDomains(false);
         });
       });
     } else {

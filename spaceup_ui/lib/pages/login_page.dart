@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:http/http.dart' as http;
+import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
 class LoginPage extends StatefulWidget {
