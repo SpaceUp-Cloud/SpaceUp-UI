@@ -56,7 +56,7 @@ class SettingsPage extends State<SettingsPageStarter> {
                       return OutlinedButton(
                         child: Text('Apply Theme'),
                         onPressed: () {
-                          changeTheme(context);
+                          Future.delayed(Duration(microseconds: 500), () => changeTheme(context));
                         },
                       );
                     },
