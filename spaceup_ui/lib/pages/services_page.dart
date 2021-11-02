@@ -156,42 +156,32 @@ class ServicesPage extends State<ServicesPageStarter> {
           controller: flipCardController,
           direction: FlipDirection.VERTICAL,
           front: Column(children: <Widget>[
-            ColoredBox(
-              color: (service.status == "FATAL" || service.status == "STOPPED")
-                  ? theme.errorColor
-                  : theme.colorScheme.secondary,
-              child: ListTile(
-                leading: Icon(Icons.miscellaneous_services),
-                title: Text(service.name),
-                subtitle: Text(service.info,),
-                //onTap: _openLogs(),
+            Container(
+              height: 75,
+              child: ColoredBox(
+                color: (service.status == "FATAL" || service.status == "STOPPED")
+                    ? theme.errorColor
+                    : theme.colorScheme.secondary,
+                child: ListTile(
+                  leading: Icon(Icons.miscellaneous_services),
+                  title: Text(service.name),
+                  subtitle: Text(service.info,),
+                  //onTap: _openLogs(),
+                ),
               ),
             )
           ]),
-          back: ColoredBox(
+          back: Container(
             color: (service.status == "FATAL" || service.status == "STOPPED")
                 ? theme.errorColor
                 : theme.colorScheme.secondary,
             child: ListView(
-              //crossAxisAlignment: CrossAxisAlignment.end,
-              //mainAxisSize: MainAxisSize.min,
               children: [
                 GridView.count(
                     shrinkWrap: true,
                     crossAxisCount: actionButtons.length,
                     children: actionButtons
                 )
-                /*GridView.builder(
-                    itemCount: actionButtons.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2
-                    ),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        child: actionButtons[index],
-                      );
-                    })*/
-
               ],
             ),
           )
