@@ -4,9 +4,11 @@ import 'dart:convert';
 import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/pages/logs_page.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
@@ -113,7 +115,7 @@ class ServicesPage extends State<ServicesPageStarter> {
             'Show Logs', /*style: TextStyle(fontSize: 18),*/
           ),
           onPressed: () {
-            _doServiceAction(service.name, "Logs");
+            Get.to(() => LogsPageStarter(service.name));
           },
         ),
         TextButton(
@@ -203,7 +205,7 @@ class ServicesPage extends State<ServicesPageStarter> {
 
     try {
       var url = await URL().baseUrl;
-      var jwt = await Util().getJWT();
+      var jwt = await Util().getJWT(context);
       var response =
           await client.get(Uri.tryParse('$url/service/list')!, headers: jwt);
       print(response.body);
@@ -221,7 +223,7 @@ class ServicesPage extends State<ServicesPageStarter> {
 
     try {
       var url = await URL().baseUrl;
-      var jwt = await Util().getJWT();
+      var jwt = await Util().getJWT(context);
       var uri = Uri.tryParse('$url/service/execute/$servicename/$action');
       var response = await client.post(uri!, headers: jwt);
       print(response.body);

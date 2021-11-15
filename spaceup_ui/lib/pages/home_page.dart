@@ -232,7 +232,6 @@ class _HomePageState extends State<HomePage> {
             Util.showMessage(context, "${snapshot.error}");
           }
 
-
           return Center(
             child: LinearProgressIndicator(),
           );
@@ -277,7 +276,7 @@ class _HomePageState extends State<HomePage> {
     final client = RetryClient(http.Client());
     try {
       final url = await URL().baseUrl;
-      final jwt = await Util().getJWT();
+      final jwt = await Util().getJWT(context);
       var response =
       await client.get(Uri.tryParse('$url/system/version')!, headers: jwt);
       if (response.body.isNotEmpty && response.statusCode == 200) {
@@ -296,7 +295,7 @@ class _HomePageState extends State<HomePage> {
     final client = RetryClient(http.Client());
     try {
       final url = await URL().baseUrl;
-      final jwt = await Util().getJWT();
+      final jwt = await Util().getJWT(context);
       var response =
           await client.get(Uri.tryParse('$url/system/hostname')!, headers: jwt);
       print(response.body);
@@ -316,7 +315,7 @@ class _HomePageState extends State<HomePage> {
     final client = RetryClient(http.Client());
     try {
       final url = await URL().baseUrl;
-      final jwt = await Util().getJWT();
+      final jwt = await Util().getJWT(context);
 
       var response =
           await client.get(Uri.tryParse('$url/system/disk')!, headers: jwt);

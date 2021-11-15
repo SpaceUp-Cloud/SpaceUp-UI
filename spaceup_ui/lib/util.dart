@@ -57,7 +57,8 @@ class Util {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Future<Map<String, String>> getJWT() async {
+  Future<Map<String, String>> getJWT(BuildContext context) async {
+    checkJWT(context);
     String jwt = await Settings().getString("jwt", "");
     Map<String, String> headers = {
       "Authorization": 'Bearer $jwt',

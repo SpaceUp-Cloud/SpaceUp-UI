@@ -222,7 +222,7 @@ class DomainPage extends State<DomainPageStarter> {
     try {
       var url = await URL().baseUrl;
       var uri = Uri.tryParse('$url/domain/delete/${domain.url}');
-      var jwt = await Util().getJWT();
+      var jwt = await Util().getJWT(context);
       var response = await client.delete(uri!, headers: jwt);
 
       if (response.body.isNotEmpty && response.statusCode == 200) {
@@ -247,7 +247,7 @@ class DomainPage extends State<DomainPageStarter> {
 
     try {
       var url = await URL().baseUrl;
-      var jwt = await Util().getJWT();
+      var jwt = await Util().getJWT(context);
       var addDomainUrl = Uri.tryParse('$url/domain/add');
       var response = await client.post(addDomainUrl!,
           headers: jwt, body: json.encode(domains));
@@ -270,7 +270,7 @@ class DomainPage extends State<DomainPageStarter> {
 
     try {
       var url = await URL().baseUrl;
-      var jwt = await Util().getJWT();
+      var jwt = await Util().getJWT(context);
       var getDomainsUrl = "$url/domain/list?cached=$isCached";
       var response =
           await client.get(Uri.tryParse(getDomainsUrl)!, headers: jwt);
