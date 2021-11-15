@@ -103,51 +103,44 @@ class ServicesPage extends State<ServicesPageStarter> {
     services.forEach((service) {
       var actionButtons = [
         ListTile(
-          //leading: Icon(Icons.miscellaneous_services),
-          title: Text(service.name),
-          //onTap: _openLogs(),
+          contentPadding: EdgeInsets.only(left: 0, right: 0),
+          title: Center(
+            child: Text(service.name),
+          ),
         ),
-        TextButton(
-          style: TextButton.styleFrom(
-              primary: Colors.white
+        ListTile(
+          contentPadding: EdgeInsets.only(left: 0, right: 0),
+          title: Center(
+            child: Text('Logs'),
           ),
-          child: const Text(
-            'Show Logs', /*style: TextStyle(fontSize: 18),*/
-          ),
-          onPressed: () {
+          onTap: () {
             Get.to(() => LogsPageStarter(service.name));
           },
         ),
-        TextButton(
-          style: TextButton.styleFrom(
-              primary: Colors.white
+        ListTile(
+          contentPadding: EdgeInsets.only(left: 0, right: 0),
+          title: Center(
+            child: Text('Start'),
           ),
-          child: const Text(
-            'Start', /*style: TextStyle(fontSize: 18),*/
-          ),
-          onPressed: () {
+          onTap: () {
             _doServiceAction(service.name, "START");
           },
         ),
-        TextButton(
-          style: TextButton.styleFrom(
-              primary: Colors.white
+        ListTile(
+          contentPadding: EdgeInsets.only(left: 0, right: 0),
+          title: Center(
+            child: Text('Stop'),
           ),
-          child: const Text(
-            'Stop', /*style: TextStyle(fontSize: 18),*/
-          ),
-          onPressed: () {
+          onTap: () {
             _doServiceAction(service.name, "STOP");
           },
         ),
-        TextButton(
-          style: TextButton.styleFrom(
-              primary: Colors.white
+        ListTile(
+          contentPadding: EdgeInsets.only(left: 0, right: 0),
+          title: Center(
+            child: Text('Restart'),
           ),
-          child: const Text(
-            'Restart', /*style: TextStyle(fontSize: 18),*/
-          ),
-          onPressed: () {
+          onTap: () {
             _doServiceAction(service.name, "RESTART");
           },
         )
@@ -167,8 +160,7 @@ class ServicesPage extends State<ServicesPageStarter> {
                 child: ListTile(
                   leading: Icon(Icons.miscellaneous_services),
                   title: Text(service.name),
-                  subtitle: Text(service.info,),
-                  //onTap: _openLogs(),
+                  subtitle: Text(service.info),
                 ),
               ),
             )
