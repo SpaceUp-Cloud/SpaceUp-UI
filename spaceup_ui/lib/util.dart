@@ -78,14 +78,11 @@ class Util {
       Settings().save("password", "");
     }
 
-    //Navigator.of(context).popUntil(ModalRoute.withName(UIData.homeRoute));
-    //Navigator.of(context).pushNamedAndRemoveUntil(UIData.loginRoute, (route) => false);
     Get.offAll(() => LoginPage());
     showMessage(context, "You have been logged out!");
   }
 
   static Future<void> login(BuildContext context) async {
-    //Navigator.of(context).pushNamedAndRemoveUntil(UIData.homeRoute, (route) => false);
     Get.offAll(() => HomePage("Home"));
     showMessage(context, "You have been logged in!");
   }
