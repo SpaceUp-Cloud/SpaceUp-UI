@@ -82,10 +82,13 @@ class _HomePageState extends State<HomePage> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
-              DrawerHeader(
-                  // TODO: Display SpaceUp Icon
-                  decoration: BoxDecoration(color: Colors.teal),
-                  child: Text('Menu')),
+              Container(
+                height: 100,
+                child: DrawerHeader(
+                    // TODO: Display SpaceUp Icon
+                    decoration: BoxDecoration(color: Colors.teal),
+                    child: Text('Menu')),
+              ),
               ListTile(
                 title: Text("Domains"),
                 onTap: () {
@@ -160,16 +163,16 @@ class _HomePageState extends State<HomePage> {
 
   Card createServerVersionCard(String version) {
     return Card(
-      //margin: EdgeInsets.fromLTRB(10.0, 5.0, 0.0, 5.0),
+        //margin: EdgeInsets.fromLTRB(10.0, 5.0, 0.0, 5.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ListTile(
-              leading: Icon(Icons.miscellaneous_services),
-              title: Text("Server version: " + version),
-            ),
-          ],
-        ));
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ListTile(
+          leading: Icon(Icons.miscellaneous_services),
+          title: Text("Server version: " + version),
+        ),
+      ],
+    ));
   }
 
   Card createHostnameCard(String hostname) {
@@ -278,7 +281,7 @@ class _HomePageState extends State<HomePage> {
       final url = await URL().baseUrl;
       final jwt = await Util().getJWT(context);
       var response =
-      await client.get(Uri.tryParse('$url/system/version')!, headers: jwt);
+          await client.get(Uri.tryParse('$url/system/version')!, headers: jwt);
       if (response.body.isNotEmpty && response.statusCode == 200) {
         print(response.body);
         serverVersion = response.body;
@@ -333,7 +336,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _refreshView() async {
     bool refreshView = await Settings().getBool("refreshView", true);
 
-    if(refreshView) {
+    if (refreshView) {
       print("Initialize view refresher");
       _timer = Timer.periodic(Duration(seconds: 5), (timer) {
         setState(() {
@@ -343,10 +346,10 @@ class _HomePageState extends State<HomePage> {
       });
     } else {
       try {
-        if(_timer.isActive) {
+        if (_timer.isActive) {
           _timer.cancel();
         }
-      } catch(e) {
+      } catch (e) {
         print("View refresh timer is not initialized");
       }
     }
