@@ -28,9 +28,7 @@ class _HomePageState extends State<HomePage> {
   var refreshKeyDisk = GlobalKey<RefreshIndicatorState>();
   late Timer _timer;
 
-  var profiles = <String>[];
-  var activeProfile = "";
-  late String selectedProfile = "http://localhost:9090";
+  var connectedServer = "";
 
   // Depending on platform the home widget shows x cards per column
   late int maxElementsPerLine;
@@ -45,10 +43,12 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     Util.checkJWT(context);
 
-    setState(() {
+    setState(() async {
       hostname = _getHostname();
       disk = _getDisk();
       serverVersion = _getServerVersion();
+
+      connectedServer = await Settings().getString("server", "");
     });
 
     final Util util = Util();
@@ -87,7 +87,10 @@ class _HomePageState extends State<HomePage> {
                 child: DrawerHeader(
                     // TODO: Display SpaceUp Icon
                     decoration: BoxDecoration(color: Colors.teal),
-                    child: Text('Menu')),
+                    child: Center(
+                        child: Text(connectedServer)
+                    )
+                ),
               ),
               ListTile(
                 title: Text("Domains"),
