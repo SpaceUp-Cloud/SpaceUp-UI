@@ -15,8 +15,9 @@ import 'package:window_size/window_size.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   if (Util().isDesktop) {
-    setWindowMaxSize(const Size(400, 700));
-    setWindowMinSize(const Size(400, 700));
+    final size = const Size(400, 700);
+    setWindowMaxSize(size);
+    setWindowMinSize(size);
   }
   runApp(MyApp());
 }
