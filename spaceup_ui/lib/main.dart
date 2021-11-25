@@ -1,5 +1,4 @@
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
@@ -10,8 +9,15 @@ import 'package:spaceup_ui/pages/login_page.dart';
 import 'package:spaceup_ui/pages/services_page.dart';
 import 'package:spaceup_ui/pages/settings_page.dart';
 import 'package:spaceup_ui/ui_data.dart';
+import 'package:spaceup_ui/util.dart';
+import 'package:window_size/window_size.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (Util().isDesktop) {
+    setWindowMaxSize(const Size(400, 700));
+    setWindowMinSize(const Size(400, 700));
+  }
   runApp(MyApp());
 }
 
