@@ -86,23 +86,6 @@ class SettingsPage extends State<SettingsPageStarter> {
 
     // Das not work yet on desktop but web
     if (!util.isDesktop || util.isWeb) {
-      /*submenus.add(SimpleSettingsTile(
-        title: "Advanced",
-        screen:
-      ));*/
-      /*submenus.add(
-        SettingsContainer(
-          children: [
-            /*Text("Profiles"),
-            TextFieldModalSettingsTile(
-                settingKey: "profiles",
-                title: "Profiles",
-                subtitle: "Separate by semicolon.",
-                keyboardType: TextInputType.multiline,
-            )*/
-          ],
-        )
-      );*/
       submenus.add(
           SettingsTileGroup(
             title: 'Behaviour',
