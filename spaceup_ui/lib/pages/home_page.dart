@@ -43,12 +43,12 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     Util.checkJWT(context);
 
-    setState(() async {
+    setState(() {
       hostname = _getHostname();
       disk = _getDisk();
       serverVersion = _getServerVersion();
 
-      connectedServer = await Settings().getString("server", "");
+      _getConnectedServer().then((value) => connectedServer = "Server: " + value);
     });
 
     final Util util = Util();
@@ -334,6 +334,10 @@ class _HomePageState extends State<HomePage> {
     }
 
     return disk;
+  }
+
+  Future<String> _getConnectedServer() async {
+    return Settings().getString("server", "");
   }
 
   Future<void> _refreshView() async {
