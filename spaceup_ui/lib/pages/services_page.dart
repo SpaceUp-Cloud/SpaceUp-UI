@@ -103,7 +103,7 @@ class ServicesPage extends State<ServicesPageStarter> {
     services.forEach((service) {
       var actionButtons = [
         ListTile(
-          contentPadding: EdgeInsets.only(left: 0, right: 0),
+          contentPadding: EdgeInsets.only(left: 5, right: 0),
           title: Text(service.name),
         ),
         ListTile(
