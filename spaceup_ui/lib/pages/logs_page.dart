@@ -99,6 +99,9 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
                 //borderRadius: BorderRadius.circular(50), // Creates border
                 color: tabcolor),
             controller: tabController,
+            onTap: (index) {
+              _scrollToTop();
+            },
             tabs: tabs),
       ),
       body: body,
