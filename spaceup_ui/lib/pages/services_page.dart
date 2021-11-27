@@ -104,42 +104,32 @@ class ServicesPage extends State<ServicesPageStarter> {
       var actionButtons = [
         ListTile(
           contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text(service.name),
-          ),
+          title: Text(service.name),
         ),
         ListTile(
           contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text('Logs'),
-          ),
+          title: Text('Logs'),
           onTap: () {
             Get.to(() => LogsPageStarter(service.name));
           },
         ),
         ListTile(
           contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text('Start'),
-          ),
+          title: Text('Start'),
           onTap: () {
             _doServiceAction(service.name, "START");
           },
         ),
         ListTile(
           contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text('Stop'),
-          ),
+          title: Text('Stop'),
           onTap: () {
             _doServiceAction(service.name, "STOP");
           },
         ),
         ListTile(
           contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text('Restart'),
-          ),
+          title: Text('Restart'),
           onTap: () {
             _doServiceAction(service.name, "RESTART");
           },
