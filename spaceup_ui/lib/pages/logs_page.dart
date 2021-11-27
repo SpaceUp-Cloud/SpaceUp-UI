@@ -70,6 +70,7 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    scrollController.dispose();
     tabController.dispose();
     super.dispose();
   }
@@ -94,9 +95,8 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
         bottom: TabBar(
             labelColor: Color.fromRGBO(4, 2, 46, 1),
             indicatorColor: Color.fromRGBO(4, 2, 46, 1),
-            labelPadding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+            labelPadding: EdgeInsets.fromLTRB(0, 5, 0, 5),
             indicator: BoxDecoration(
-                //borderRadius: BorderRadius.circular(50), // Creates border
                 color: tabcolor),
             controller: tabController,
             onTap: (index) {
@@ -160,8 +160,7 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
       });
     }
 
-    logTabContent.add(SingleChildScrollView(
-      scrollDirection: Axis.vertical,
+    logTabContent.add(Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: logs,
@@ -178,8 +177,7 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
       });
     }
 
-    logTabContent.add(SingleChildScrollView(
-      scrollDirection: Axis.vertical,
+    logTabContent.add(Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: errors,
