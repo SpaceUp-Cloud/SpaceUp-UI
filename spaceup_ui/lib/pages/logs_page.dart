@@ -241,7 +241,7 @@ class Logs {
 }
 
 Logs _logsFromJson(Map<String, dynamic> json) {
-  print("Error log: $json");
+  print("logs: $json");
   final List<String> info = List<String>.from(json["log"]["info"]).toList();
   final List<String> error = List<String>.from(json["log"]["error"]).toList();
 
