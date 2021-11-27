@@ -155,7 +155,7 @@ class ServicesPage extends State<ServicesPageStarter> {
               height: 75,
               child: ColoredBox(
                 color: (service.status == "FATAL" || service.status == "STOPPED")
-                    ? theme.errorColor
+                    ? Colors.orange
                     : theme.colorScheme.secondary,
                 child: ListTile(
                   leading: Icon(Icons.miscellaneous_services),
@@ -167,7 +167,7 @@ class ServicesPage extends State<ServicesPageStarter> {
           ]),
           back: Container(
             color: (service.status == "FATAL" || service.status == "STOPPED")
-                ? theme.errorColor
+                ? Colors.orange
                 : theme.colorScheme.secondary,
             child: ListView(
               children: [
