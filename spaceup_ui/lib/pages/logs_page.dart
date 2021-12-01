@@ -16,7 +16,7 @@ class LogsPageStarter extends StatefulWidget {
   LogsPage createState() => LogsPage();
 }
 
-class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
+class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixin  {
   ScrollController scrollController = ScrollController();
   late TabController tabController =
       TabController(initialIndex: 0, length: 2, vsync: this);
@@ -28,8 +28,8 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
 
   // Tabs
   var tabs = [
-    Text('Info'),
-    Text('Error'),
+    Tab(text: 'Info', height: 30,),
+    Tab(text: 'Error', height: 30,),
   ];
 
   // TabColor
@@ -77,32 +77,32 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    var body = Container(
-      child: RefreshIndicator(
-        onRefresh: _onRefresh,
-        key: refreshKey,
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          controller: scrollController,
-          child: _getLogsBuilder(),
-        ),
-      ),
+    var body = NestedScrollView(
+      /*physics: AlwaysScrollableScrollPhysics(),
+          controller: scrollController,*/
+      headerSliverBuilder: (context, value) {
+        return [
+          // Add here Filter component
+          SliverToBoxAdapter(
+            child: TabBar(
+                labelColor: Color.fromRGBO(4, 2, 46, 1),
+                indicatorColor: Color.fromRGBO(4, 2, 46, 1),
+                labelPadding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                indicator: BoxDecoration(
+                    color: tabcolor),
+                controller: tabController,
+                onTap: (index) {
+                  _scrollToTop();
+                },
+                tabs: tabs),
+          ),
+        ];
+      }, body: _getLogsBuilder(),
     );
 
     var scaffold = Scaffold(
       appBar: AppBar(
         title: Text("${widget.servicename} Logs"),
-        bottom: TabBar(
-            labelColor: Color.fromRGBO(4, 2, 46, 1),
-            indicatorColor: Color.fromRGBO(4, 2, 46, 1),
-            labelPadding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-            indicator: BoxDecoration(
-                color: tabcolor),
-            controller: tabController,
-            onTap: (index) {
-              _scrollToTop();
-            },
-            tabs: tabs),
       ),
       body: body,
       floatingActionButton: _showBackToTopButton == false
@@ -125,9 +125,7 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
             var infoLogs = snapshot.data!.info;
             var errorLogs = snapshot.data!.error;
 
-            return Container(
-              child: _buildLogView(infoLogs, errorLogs),
-            );
+            return _buildLogView(infoLogs, errorLogs);
           } else if (!snapshot.hasData && snapshot.data == null) {
             return Center(
               child: Text(
@@ -146,8 +144,6 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
   }
 
   Widget _buildLogView(List<String> infoLogs, List<String> errorLogs) {
-    var transformed = <Widget>[];
-
     var logTabContent = <Widget>[];
     var logs = <Widget>[];
 
@@ -160,11 +156,11 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
       });
     }
 
-    logTabContent.add(Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: logs,
-      ),
+    logTabContent.add(ListView(
+      physics: const ClampingScrollPhysics(),
+      shrinkWrap: true,
+      children: logs,
+      controller: scrollController,
     ));
 
     // error log
@@ -177,19 +173,14 @@ class LogsPage extends State<LogsPageStarter> with TickerProviderStateMixin {
       });
     }
 
-    logTabContent.add(Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: errors,
-      ),
+    logTabContent.add(ListView(
+      physics: const ClampingScrollPhysics(),
+      shrinkWrap: true,
+      children: errors,
+      controller: scrollController,
     ));
 
-    transformed
-        .add(TabBarView(controller: tabController, children: logTabContent));
-
-    return Column(
-      children: transformed,
-    );
+    return TabBarView(controller: tabController, children: logTabContent);
   }
 
   void _scrollToTop() {
@@ -241,14 +232,15 @@ class Logs {
 }
 
 Logs _logsFromJson(Map<String, dynamic> json) {
-  print("logs: $json");
   final List<String> info = List<String>.from(json["log"]["info"]).toList();
   final List<String> error = List<String>.from(json["log"]["error"]).toList();
 
   List<String> cleanedInfo = [];
   List<String> cleanedError = [];
 
+  print("info log: $info");
   if (info.isNotEmpty) {
+    print("info log is not empty");
     info.forEach((element) {
       var trimmed = element.trim();
       cleanedInfo.add(trimmed);
@@ -256,6 +248,7 @@ Logs _logsFromJson(Map<String, dynamic> json) {
   }
 
   if (error.isNotEmpty) {
+    print("info log is not empty");
     error.forEach((element) {
       var trimmed = element.trim();
       cleanedError.add(trimmed);
