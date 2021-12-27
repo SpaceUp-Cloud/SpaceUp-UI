@@ -36,6 +36,7 @@ class _LoginState extends State<LoginPage>{
 
     final scaffold = Scaffold(
       appBar: AppBar(
+        backgroundColor: theme.primaryColor,
         title: Text("SpaceUp Login"),
       ),
       body: Padding(

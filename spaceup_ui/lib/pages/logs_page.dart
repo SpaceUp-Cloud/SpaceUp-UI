@@ -63,6 +63,7 @@ class LogsPage extends State<LogsPageStarter> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text("Logs"),
       ),
       body: body,

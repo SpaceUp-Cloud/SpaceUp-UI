@@ -66,6 +66,7 @@ class DomainPage extends State<DomainPageStarter> {
 
     final scaffold = Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text("Domains"),
       ),
       floatingActionButton: AnimatedOpacity(

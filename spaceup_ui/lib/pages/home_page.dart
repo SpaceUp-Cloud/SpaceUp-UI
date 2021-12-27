@@ -76,6 +76,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: theme.primaryColor,
           title: Text(widget.title!),
         ),
         drawer: Drawer(
@@ -86,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                 height: 100,
                 child: DrawerHeader(
                     // TODO: Display SpaceUp Icon
-                    decoration: BoxDecoration(color: Colors.teal),
+                    decoration: BoxDecoration(color: theme.primaryColor),
                     child: Text('Menu')),
               ),
               ListTile(

@@ -58,6 +58,7 @@ class ServicesPage extends State<ServicesPageStarter> {
 
     final scaffold = Scaffold(
       appBar: AppBar(
+        backgroundColor: theme.primaryColor,
         title: Text("Services"),
       ),
       body: Stack(
