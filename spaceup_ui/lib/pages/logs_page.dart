@@ -8,7 +8,7 @@ import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
 class LogsPageStarter extends StatefulWidget {
-  LogsPageStarter(this.servicename): super();
+  LogsPageStarter(this.servicename) : super();
 
   final String servicename;
 
@@ -16,17 +16,30 @@ class LogsPageStarter extends StatefulWidget {
   LogsPage createState() => LogsPage();
 }
 
-class LogsPage extends State<LogsPageStarter> {
+class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixin  {
   ScrollController scrollController = ScrollController();
+  late TabController tabController =
+      TabController(initialIndex: 0, length: 2, vsync: this);
   var refreshKey = GlobalKey<RefreshIndicatorState>();
 
   bool _showBackToTopButton = false;
 
   late Future<Logs> logs = Future.value(Logs([], []));
 
+  // Tabs
+  var tabs = [
+    Tab(text: 'Info', height: 30,),
+    Tab(text: 'Error', height: 30,),
+  ];
+
+  // TabColor
+  late MaterialAccentColor tabcolor = Colors.greenAccent;
+
   /// default filters
   var limit = 500;
   var reversed = true;
+
+  // TODO: use enum instead
   var type = "both"; // info, error, both
 
   @override
@@ -34,6 +47,14 @@ class LogsPage extends State<LogsPageStarter> {
     super.initState();
     setState(() {
       logs = _getLogs(widget.servicename);
+    });
+
+    tabController.addListener(() {
+      setState(() {
+        tabcolor = tabController.index == 0
+            ? Colors.greenAccent
+            : Colors.deepOrangeAccent;
+      });
     });
 
     scrollController.addListener(() {
@@ -48,32 +69,52 @@ class LogsPage extends State<LogsPageStarter> {
   }
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var body = Container(
-      child: RefreshIndicator(
-        onRefresh: _onRefresh,
-        key: refreshKey,
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          controller: scrollController,
-          child: _getLogsBuilder(),
-        ),
-      ),
+    var body = NestedScrollView(
+      /*physics: AlwaysScrollableScrollPhysics(),
+          controller: scrollController,*/
+      headerSliverBuilder: (context, value) {
+        return [
+          // Add here Filter component
+          SliverToBoxAdapter(
+            child: TabBar(
+                labelColor: Color.fromRGBO(4, 2, 46, 1),
+                indicatorColor: Color.fromRGBO(4, 2, 46, 1),
+                labelPadding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                indicator: BoxDecoration(
+                    color: tabcolor),
+                controller: tabController,
+                onTap: (index) {
+                  _scrollToTop();
+                },
+                tabs: tabs),
+          ),
+        ];
+      }, body: _getLogsBuilder(),
     );
 
-    return Scaffold(
+    var scaffold = Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: Text("Logs"),
+        title: Text("${widget.servicename} Logs"),
       ),
       body: body,
       floatingActionButton: _showBackToTopButton == false
-        ? null
-        : FloatingActionButton(
-          onPressed: _scrollToTop,
-          child: Icon(Icons.arrow_upward),
-      ),
+          ? null
+          : FloatingActionButton(
+              onPressed: _scrollToTop,
+              child: Icon(Icons.arrow_upward),
+            ),
     );
+
+    return scaffold;
   }
 
   FutureBuilder<Logs> _getLogsBuilder() {
@@ -85,9 +126,11 @@ class LogsPage extends State<LogsPageStarter> {
             var infoLogs = snapshot.data!.info;
             var errorLogs = snapshot.data!.error;
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: _buildLogView(infoLogs, errorLogs),
+            return _buildLogView(infoLogs, errorLogs);
+          } else if (!snapshot.hasData && snapshot.data == null) {
+            return Center(
+              child: Text(
+                  'No logs found. Service log path is correctly configured?'),
             );
           } else if (snapshot.hasError) {
             return Center(
@@ -101,57 +144,44 @@ class LogsPage extends State<LogsPageStarter> {
         });
   }
 
-  List<Widget> _buildLogView(List<String> infoLogs, List<String> errorLogs) {
-    var transformed = <Widget>[];
-    transformed.add(
-        ListTile(
-          tileColor: Theme.of(context).primaryColor,
-          visualDensity: VisualDensity(horizontal: 0, vertical: -4),
-          minVerticalPadding: 0,
-          title: Text("Info Log"),
-        )
-    );
-
+  Widget _buildLogView(List<String> infoLogs, List<String> errorLogs) {
+    var logTabContent = <Widget>[];
     var logs = <Widget>[];
-    infoLogs.forEach((log) {
-      logs.add(
-        Text(log),
-      );
-    });
-    transformed.add(
-        SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: logs,
-          ),
-        )
-    );
-    transformed.add(
-        ListTile(
-          tileColor: Theme.of(context).errorColor,
-          visualDensity: VisualDensity(horizontal: 0, vertical: -4),
-          minVerticalPadding: 0,
-          title: Text("Error Log"),
-        )
-    );
-    var errors = <Widget>[];
-    errorLogs.forEach((log) {
-      errors.add(
-        Text(log),
-      );
-    });
-    transformed.add(
-        SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: errors,
-          ),
-        )
-    );
 
-    return transformed;
+    // Info log
+    if (infoLogs.isNotEmpty) {
+      infoLogs.forEach((log) {
+        logs.add(
+          Text(log),
+        );
+      });
+    }
+
+    logTabContent.add(ListView(
+      physics: const ClampingScrollPhysics(),
+      shrinkWrap: true,
+      children: logs,
+      controller: scrollController,
+    ));
+
+    // error log
+    var errors = <Widget>[];
+    if (errorLogs.isNotEmpty) {
+      errorLogs.forEach((log) {
+        errors.add(
+          Text(log),
+        );
+      });
+    }
+
+    logTabContent.add(ListView(
+      physics: const ClampingScrollPhysics(),
+      shrinkWrap: true,
+      children: errors,
+      controller: scrollController,
+    ));
+
+    return TabBarView(controller: tabController, children: logTabContent);
   }
 
   void _scrollToTop() {
@@ -175,8 +205,7 @@ class LogsPage extends State<LogsPageStarter> {
       final logsUri = Uri.tryParse(
           '$url/service/logs/$servicename?limit=$limit&reversed=$reversed&type=$type');
       print(logsUri);
-      var response =
-      await client.get(logsUri!, headers: jwt);
+      var response = await client.get(logsUri!, headers: jwt);
       if (response.body.isNotEmpty && response.statusCode == 200) {
         final parsed = json.decode(response.body);
         logs = Logs.fromJson(parsed);
@@ -192,7 +221,6 @@ class LogsPage extends State<LogsPageStarter> {
 
     return logs;
   }
-
 }
 
 class Logs {
@@ -205,22 +233,28 @@ class Logs {
 }
 
 Logs _logsFromJson(Map<String, dynamic> json) {
-  print("Error log: $json");
   final List<String> info = List<String>.from(json["log"]["info"]).toList();
   final List<String> error = List<String>.from(json["log"]["error"]).toList();
 
   List<String> cleanedInfo = [];
   List<String> cleanedError = [];
 
-  info.forEach((element) {
-    var trimmed = element.trim();
-    cleanedInfo.add(trimmed);
-  });
+  print("info log: $info");
+  if (info.isNotEmpty) {
+    print("info log is not empty");
+    info.forEach((element) {
+      var trimmed = element.trim();
+      cleanedInfo.add(trimmed);
+    });
+  }
 
-  error.forEach((element) {
-    var trimmed = element.trim();
-    cleanedError.add(trimmed);
-  });
+  if (error.isNotEmpty) {
+    print("info log is not empty");
+    error.forEach((element) {
+      var trimmed = element.trim();
+      cleanedError.add(trimmed);
+    });
+  }
 
   return Logs(cleanedInfo, cleanedError);
 }

@@ -104,43 +104,33 @@ class ServicesPage extends State<ServicesPageStarter> {
     services.forEach((service) {
       var actionButtons = [
         ListTile(
-          contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text(service.name),
-          ),
+          contentPadding: EdgeInsets.only(left: 5, right: 0),
+          title: Text(service.name),
         ),
         ListTile(
           contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text('Logs'),
-          ),
+          title: Text('Logs'),
           onTap: () {
             Get.to(() => LogsPageStarter(service.name));
           },
         ),
         ListTile(
           contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text('Start'),
-          ),
+          title: Text('Start'),
           onTap: () {
             _doServiceAction(service.name, "START");
           },
         ),
         ListTile(
           contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text('Stop'),
-          ),
+          title: Text('Stop'),
           onTap: () {
             _doServiceAction(service.name, "STOP");
           },
         ),
         ListTile(
           contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Center(
-            child: Text('Restart'),
-          ),
+          title: Text('Restart'),
           onTap: () {
             _doServiceAction(service.name, "RESTART");
           },
@@ -156,7 +146,7 @@ class ServicesPage extends State<ServicesPageStarter> {
               height: 75,
               child: ColoredBox(
                 color: (service.status == "FATAL" || service.status == "STOPPED")
-                    ? theme.errorColor
+                    ? Colors.orange
                     : theme.colorScheme.secondary,
                 child: ListTile(
                   leading: Icon(Icons.miscellaneous_services),
@@ -168,7 +158,7 @@ class ServicesPage extends State<ServicesPageStarter> {
           ]),
           back: Container(
             color: (service.status == "FATAL" || service.status == "STOPPED")
-                ? theme.errorColor
+                ? Colors.orange
                 : theme.colorScheme.secondary,
             child: ListView(
               children: [
