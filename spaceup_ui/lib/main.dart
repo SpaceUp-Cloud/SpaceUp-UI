@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
     return ThemeProvider(
       initTheme: themeData,
       builder: (_, myTheme) {
-        print("Theme mode: ${myTheme!.brightness}");
+        print("Theme mode: ${myTheme.brightness}");
         return GetMaterialApp(
           title: 'SpaceUp Client',
           debugShowCheckedModeBanner: false,

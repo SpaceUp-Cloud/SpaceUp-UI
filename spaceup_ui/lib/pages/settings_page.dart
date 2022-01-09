@@ -134,17 +134,18 @@ class SettingsPage extends State<SettingsPageStarter> {
 
     print(systemMode);
     if (themeMode == 'system') {
-      var brightness = ThemeProvider.of(context)!.brightness;
-      ThemeSwitcher.of(context)!.changeTheme(
-          reverseAnimation: brightness == Brightness.dark ? true : false,
+      //var brightness = ThemeProvider.of(context)!.brightness;
+
+      ThemeSwitcher.of(context).changeTheme(
+          //isReversed: brightness == Brightness.dark ? true : false,
           theme: systemMode
       );
     } else if (themeMode == 'dark') {
-      ThemeSwitcher.of(context)!.changeTheme(
+      ThemeSwitcher.of(context).changeTheme(
           theme: darkMode
       );
     } else {
-      ThemeSwitcher.of(context)!.changeTheme(
+      ThemeSwitcher.of(context).changeTheme(
           theme: lightMode
       );
     }
