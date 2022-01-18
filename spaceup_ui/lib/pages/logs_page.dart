@@ -33,7 +33,7 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
   ];
 
   // TabColor
-  late MaterialAccentColor tabcolor = Colors.greenAccent;
+  late Color tabcolor = Colors.teal;
 
   /// default filters
   var limit = 500;
@@ -52,8 +52,8 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
     tabController.addListener(() {
       setState(() {
         tabcolor = tabController.index == 0
-            ? Colors.greenAccent
-            : Colors.deepOrangeAccent;
+            ? Colors.teal
+            : Colors.deepOrange;
       });
     });
 
@@ -85,7 +85,7 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
           // Add here Filter component
           SliverToBoxAdapter(
             child: TabBar(
-                labelColor: Color.fromRGBO(4, 2, 46, 1),
+                labelColor: Theme.of(context).textTheme.bodyText1?.color,
                 indicatorColor: Color.fromRGBO(4, 2, 46, 1),
                 labelPadding: EdgeInsets.fromLTRB(0, 5, 0, 5),
                 indicator: BoxDecoration(
