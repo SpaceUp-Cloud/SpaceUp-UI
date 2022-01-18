@@ -1,3 +1,3 @@
 # SpaceUp-UI
 
-Modern UI with Flutter for Web and Android
+Modern UI with Flutter for Web, Android, Windows and Linux.
