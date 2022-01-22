@@ -129,8 +129,6 @@ class _LoginState extends State<LoginPage>{
         print("Login was successful! ${response.body}");
 
         Settings().save("jwt", JWT.fromJson(jsonDecode(response.body)).access_token);
-        Settings().save("profile_active", url);
-
         Settings().save("server", url);
         Settings().save("username", username);
         Settings().save("password", password);

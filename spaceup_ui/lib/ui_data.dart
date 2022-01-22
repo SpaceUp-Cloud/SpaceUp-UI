@@ -14,13 +14,13 @@ class URL {
   Future<String> get baseUrl async {
     String baseApiUrl = "/api";
 
-    baseApiUrl = await Settings().getString("profile_active", "") + baseApiUrl;
+    baseApiUrl = await Settings().getString("server", "") + baseApiUrl;
     print("BaseApiUrl: $baseApiUrl");
     return baseApiUrl;
   }
 
   Future<String> get serverUrl async {
-    return await Settings().getString("profile_active", "");
+    return await Settings().getString("server", "");
   }
 }
 
