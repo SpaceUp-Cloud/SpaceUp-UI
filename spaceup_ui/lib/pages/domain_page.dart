@@ -183,27 +183,42 @@ class DomainPage extends State<DomainPageStarter> {
     return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Add Domains!"),
-            content: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller: _textFieldController,
-                    textInputAction: TextInputAction.go,
-                    keyboardType: TextInputType.multiline,
-                    decoration: InputDecoration(
-                        hintText: "Add here... x.y.z; a.b.c; ..."),
-                  )
-                ],
+          var dialog = AlertDialog(
+            title: Text("Add your domains"),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0)
+            ),
+            content: Container(
+              width: MediaQuery.of(context).size.width * 2.5,
+              child: Form(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    TextFormField(
+                      controller: _textFieldController,
+                      textInputAction: TextInputAction.go,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 5,
+                      validator: (value) {
+                        return (value != null && value.isNotEmpty) ? value : "Please enter domains";
+                      },
+                      decoration: InputDecoration(
+                          hintText: "your.domain; foo.bar.de; blub.foo.bar; ..."),
+                    )
+                  ],
+                ),
               ),
             ),
             actions: <Widget>[
               TextButton(
                   child: Text('Submit'),
                   onPressed: () {
-                    _addDomain(_textFieldController.value.text);
-                    Navigator.of(context).pop();
+                    if(_textFieldController.value.text.isNotEmpty) {
+                      _addDomain(_textFieldController.value.text);
+                      Navigator.of(context).pop();
+                    } else {
+                      Util.showMessage(context, "You have to enter domains!");
+                    }
                   }),
               TextButton(
                 child: Text('Cancel'),
@@ -213,6 +228,8 @@ class DomainPage extends State<DomainPageStarter> {
               )
             ],
           );
+
+          return Padding(padding: EdgeInsets.only(left: 50.0, right: 50.0), child: dialog,);
         });
   }
 
