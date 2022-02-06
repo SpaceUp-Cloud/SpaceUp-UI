@@ -36,7 +36,7 @@ class _LoginState extends State<LoginPage>{
 
     final scaffold = Scaffold(
       appBar: AppBar(
-        backgroundColor: theme.primaryColor,
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text("SpaceUp Login"),
       ),
       body: Padding(
@@ -143,8 +143,6 @@ class _LoginState extends State<LoginPage>{
       client.close();
     }
   }
-
-
 
   Future<void> getUserSettings() async {
     bool isrememberLogin = await Settings().getBool("rememberLogin", false);

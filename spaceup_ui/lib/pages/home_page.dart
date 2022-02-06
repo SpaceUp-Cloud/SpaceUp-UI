@@ -117,7 +117,7 @@ class _HomePageState extends State<HomePage> {
               ListTile(
                 title: Text('About'),
                 onTap: () {
-                  Get.back();
+                  Get.toNamed(UIData.aboutRoute);
                 },
               ),
               Divider(

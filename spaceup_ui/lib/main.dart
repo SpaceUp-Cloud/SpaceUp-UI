@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/pages/about_page.dart';
 import 'package:spaceup_ui/pages/domain_page.dart';
 import 'package:spaceup_ui/pages/home_page.dart';
 import 'package:spaceup_ui/pages/login_page.dart';
@@ -80,6 +81,12 @@ class MyApp extends StatelessWidget {
                   return PageTransition(
                       child: HomePage("Home"),
                       type: PageTransitionType.leftToRight);
+                }
+              case '/about':
+                {
+                  return PageTransition(
+                      child: AboutPageStarter(),
+                      type: PageTransitionType.fade);
                 }
               case '/':
                 {
