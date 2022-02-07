@@ -70,6 +70,7 @@ class _HomePageState extends State<HomePage> {
     ThemeData theme = Theme.of(context);
     //checkingForBioMetrics().then((value) => _authenticateMe());
 
+    final util = Util();
     return Scaffold(
         appBar: AppBar(
           backgroundColor: theme.primaryColor,
@@ -80,7 +81,7 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               Container(
-                height: 100,
+                height: (util.isDesktop || util.isWeb) ? 60 : 100,
                 child: DrawerHeader(
                     // TODO: Display SpaceUp Icon
                     decoration: BoxDecoration(color: theme.primaryColor),
