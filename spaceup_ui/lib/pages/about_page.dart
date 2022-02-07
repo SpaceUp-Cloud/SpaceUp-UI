@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 
 
 class AboutPageStarter extends StatefulWidget {
@@ -10,6 +11,15 @@ class AboutPageStarter extends StatefulWidget {
 }
 
 class AboutPage extends State<AboutPageStarter> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getServer();
+
+  }
+
   @override
   Widget build(BuildContext context) {
     final scaffold = Scaffold(
@@ -17,25 +27,38 @@ class AboutPage extends State<AboutPageStarter> {
         backgroundColor: Theme.of(context).primaryColor,
         title: Text("About SpaceUp"),
       ),
-      body: Markdown(
-          selectable: false,
-          data: _description,
-          extensionSet: md.ExtensionSet(
-            <md.BlockSyntax>[],
-            <md.InlineSyntax>[md.EmojiSyntax()],
-          ),
-          onTapLink: (String txt, String? href, String title) async => {
-            if(await canLaunch(href!)) { await launch(href) }
-          },
+      body: FutureBuilder(
+        future: _getServer(),
+        builder: (context, AsyncSnapshot<String> snapshot) {
+          if(snapshot.hasData && snapshot.data != null) {
+            return Markdown(
+              selectable: false,
+              data: snapshot.data as String,
+              extensionSet: md.ExtensionSet(
+                <md.BlockSyntax>[],
+                <md.InlineSyntax>[md.EmojiSyntax()],
+              ),
+              onTapLink: (String txt, String? href, String title) async => {
+                if(await canLaunch(href!)) { await launch(href) }
+              },
+            );
+          } else {
+            return Container(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
       )
     );
 
     return scaffold;
   }
 
-}
+  Future<String> _getServer() async {
+    String server = "";
+    await Settings().getString("server", "").then((value) => server = value!);
 
-const String _description = '''
+    var _description = '''
 ### SpaceUp is an opensource solution to handle your webservices on your webhoster easily!  
 
 ### Features
@@ -54,7 +77,15 @@ const String _description = '''
 ---
 \u00A9 2022 Gino Atlas <thraax.session@iatlas.technology>
 
+For documentations open the [website]($server) of your installed SpaceUp.
+
 Licenses:  
 [SpaceUp-Ui License](https://git.iatlas.dev/SpaceUp/SpaceUp-UI)  
 [SpaceUp-Server License](https://git.iatlas.dev/SpaceUp/SpaceUp-Server)
 ''';
+
+    return _description;
+  }
+
+}
+
