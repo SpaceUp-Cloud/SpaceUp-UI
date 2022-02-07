@@ -1,5 +1,5 @@
 name: spaceup_ui
-description: A modern SpaceUp UI for Web, Android and Windows
+description: A modern SpaceUp UI for Web, Android, Linux and Windows
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
