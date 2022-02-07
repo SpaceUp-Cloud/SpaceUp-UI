@@ -26,7 +26,7 @@ dependencies:
 
   animated_theme_switcher: ^2.0.6
   flip_card: ^0.6.0
-  local_auth: ^1.1.5
+  #local_auth: ^1.1.5
   http: ^0.13.2
   jwt_decoder: ^2.0.1
   page_transition: ^2.0.5
