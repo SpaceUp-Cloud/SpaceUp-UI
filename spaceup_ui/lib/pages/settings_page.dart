@@ -123,7 +123,7 @@ class SettingsPage extends State<SettingsPageStarter> {
   }
 
   Future<void> changeTheme(BuildContext context) async {
-    String themeMode = await Settings().getString("themeMode", "system");
+    String themeMode = (await Settings().getString("themeMode", "system"))!;
     print("Change theme $themeMode");
 
     final lightMode = ThemeConfig.lightMode;

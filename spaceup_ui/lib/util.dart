@@ -59,7 +59,7 @@ class Util {
 
   Future<Map<String, String>> getJWT(BuildContext context) async {
     checkJWT(context);
-    String jwt = await Settings().getString("jwt", "");
+    String jwt = (await Settings().getString("jwt", ""))!;
     Map<String, String> headers = {
       "Authorization": 'Bearer $jwt',
       "Content-type": 'application/json'
@@ -88,7 +88,7 @@ class Util {
   }
 
   static Future<void> checkJWT(BuildContext context) async {
-    final jwt = await Settings().getString("jwt", "");
+    final jwt = (await Settings().getString("jwt", ""))!;
     try {
       if(!JwtDecoder.isExpired(jwt)) {
         // When are on the login page, we want to login

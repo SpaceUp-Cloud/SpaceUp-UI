@@ -338,7 +338,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<String> _getConnectedServer() async {
-    return Settings().getString("server", "");
+    return (await Settings().getString("server", ""))!;
   }
 
   Future<void> _refreshView() async {

@@ -154,9 +154,9 @@ class _LoginState extends State<LoginPage>{
 
 
     if(isrememberLogin) {
-      urlText.text = await Settings().getString("server", "https://");
-      usernameText.text = await Settings().getString("username", "");
-      passwordText.text = await Settings().getString("password", "");
+      urlText.text = (await Settings().getString("server", "https://"))!;
+      usernameText.text = (await Settings().getString("username", ""))!;
+      passwordText.text = (await Settings().getString("password", ""))!;
     }
   }
 }

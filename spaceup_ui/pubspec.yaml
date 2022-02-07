@@ -32,7 +32,10 @@ dependencies:
   page_transition: ^2.0.5
   universal_io: ^2.0.4
   get: ^4.3.8
-  shared_preferences_settings: ^1.2.0
+  shared_preferences_settings:
+    git:
+      url: https://github.com/BarthaBRW/shared_preferences_settings
+
   url_launcher: ^6.0.18
   flutter_markdown: ^0.6.9
   # Maybe
