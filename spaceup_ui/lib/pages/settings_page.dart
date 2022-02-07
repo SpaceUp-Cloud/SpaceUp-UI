@@ -21,8 +21,49 @@ class SettingsPage extends State<SettingsPageStarter> {
   @override
   Widget build(BuildContext context) {
     final Util util = Util();
+    final isPartlyDesktop = (!util.isDesktop || Platform.isLinux);
 
     final submenus = <Widget>[];
+    submenus.add(
+        SwitchSettingsTile(
+          settingKey: 'refreshView',
+          icon: Icon(Icons.refresh),
+          title: 'Automatically refresh views',
+          defaultValue: true,
+        )
+    );
+    submenus.add(
+        SettingsTileGroup(
+          title: 'Theme',
+          children: [
+            RadioSettingsTile(
+              icon: Icon(Icons.wb_sunny),
+              defaultKey: 'system',
+              settingKey: 'themeMode',
+              expandable: true,
+              title: 'Theme mode',
+              values: {
+                'system': 'System mode',
+                'light': 'Light mode',
+                'dark': 'Dark mode'
+              },
+            ),
+            ThemeSwitcher(
+              clipper: ThemeSwitcherCircleClipper(),
+              builder: (context) {
+                return OutlinedButton(
+                  child: Text('Apply Theme'),
+                  onPressed: () {
+                    Future.delayed(Duration(microseconds: 500), () =>
+                        changeTheme(context));
+                  },
+                );
+              },
+            )
+          ],
+        )
+    );
+
     if (util.isMobile) {
       // ... mobile specific
       submenus.add(
@@ -35,43 +76,6 @@ class SettingsPage extends State<SettingsPageStarter> {
                 settingKey: "fingerprint_enabled",
                 defaultValue: false,
               ),
-              SwitchSettingsTile(
-                settingKey: 'refreshView',
-                icon: Icon(Icons.refresh),
-                title: 'Automatically refresh views',
-                defaultValue: true,
-              ),
-              SettingsTileGroup(
-                title: 'Theme',
-                children: [
-                  RadioSettingsTile(
-                    icon: Icon(Icons.wb_sunny),
-                    defaultKey: 'system',
-                    settingKey: 'themeMode',
-                    expandable: true,
-                    title: 'Theme mode',
-                    values: {
-                      'system': 'System mode',
-                      'light': 'Light mode',
-                      'dark': 'Dark mode'
-                    },
-                  ),
-                  ThemeSwitcher(
-                    clipper: ThemeSwitcherCircleClipper(),
-                    builder: (context) {
-                      return OutlinedButton(
-                        child: Text('Apply Theme'),
-                        onPressed: () {
-                          Future.delayed(Duration(microseconds: 500), () =>
-                              changeTheme(context));
-                        },
-                      );
-                    },
-                  )
-                ],
-
-              )
-
             ],
           )
       );
@@ -84,8 +88,8 @@ class SettingsPage extends State<SettingsPageStarter> {
       // ... desktop specific
     }*/
 
-    // Das not work yet on desktop but web
-    if (!util.isDesktop || util.isWeb) {
+    // Das not work yet on desktop (except Linux) but web
+    if (isPartlyDesktop || util.isWeb) {
       submenus.add(
           SettingsTileGroup(
             title: 'Behaviour',
@@ -100,10 +104,10 @@ class SettingsPage extends State<SettingsPageStarter> {
       );
     }
 
-    if (util.isDesktop && !util.isWeb) {
+    if (util.isDesktop && !isPartlyDesktop && !util.isWeb) {
       submenus.add(
           SettingsContainer(
-            child: Text("Does not work yet on desktop."),
+            child: Text("Does not work yet on this desktop."),
           )
       );
     }
