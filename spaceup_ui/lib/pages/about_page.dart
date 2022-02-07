@@ -25,7 +25,7 @@ class AboutPage extends State<AboutPageStarter> {
             <md.InlineSyntax>[md.EmojiSyntax()],
           ),
           onTapLink: (String txt, String? href, String title) async => {
-            if(await canLaunch(href)) { await launch(href) }
+            if(await canLaunch(href!)) { await launch(href) }
           },
       )
     );
