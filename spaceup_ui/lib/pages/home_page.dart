@@ -28,8 +28,6 @@ class _HomePageState extends State<HomePage> {
   var refreshKeyDisk = GlobalKey<RefreshIndicatorState>();
   late Timer _timer;
 
-  var connectedServer = "";
-
   // Depending on platform the home widget shows x cards per column
   late int maxElementsPerLine;
 
@@ -47,8 +45,6 @@ class _HomePageState extends State<HomePage> {
       hostname = _getHostname();
       disk = _getDisk();
       serverVersion = _getServerVersion();
-
-      _getConnectedServer().then((value) => connectedServer = "Server: " + value);
     });
 
     final Util util = Util();
@@ -89,7 +85,16 @@ class _HomePageState extends State<HomePage> {
                     // TODO: Display SpaceUp Icon
                     decoration: BoxDecoration(color: theme.primaryColor),
                     child: Center(
-                        child: Text(connectedServer)
+                        child: FutureBuilder(
+                          future: _getConnectedServer(),
+                          builder: (context, snapshot) {
+                            if(snapshot.hasData) {
+                              return Text(snapshot.data as String);
+                            } else {
+                              return CircularProgressIndicator();
+                            }
+                          },
+                        )
                     )
                 ),
               ),
@@ -134,24 +139,8 @@ class _HomePageState extends State<HomePage> {
         ),
         body: Column(
           children: [
-            RefreshIndicator(
-              child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                controller: scrollController,
-                child: getServerVersionBuilder(),
-              ),
-              onRefresh: _getServerVersion,
-              key: refreshKeyServerVersion,
-            ),
-            RefreshIndicator(
-              child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                controller: scrollController,
-                child: getHostnameBuilder(),
-              ),
-              onRefresh: _getHostname,
-              key: refreshKeyHostname,
-            ),
+            getServerVersionBuilder(),
+            getHostnameBuilder(),
             RefreshIndicator(
               child: SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
@@ -346,7 +335,7 @@ class _HomePageState extends State<HomePage> {
 
     if (refreshView) {
       print("Initialize view refresher");
-      _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      _timer = Timer.periodic(Duration(seconds: 30), (timer) {
         setState(() {
           disk = _getDisk();
           serverVersion = _getServerVersion();
