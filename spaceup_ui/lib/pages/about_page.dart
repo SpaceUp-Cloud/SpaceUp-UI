@@ -16,7 +16,7 @@ class AboutPage extends State<AboutPageStarter> {
   void initState() {
     super.initState();
 
-    _getServer();
+    _getAboutText();
 
   }
 
@@ -28,7 +28,7 @@ class AboutPage extends State<AboutPageStarter> {
         title: Text("About SpaceUp"),
       ),
       body: FutureBuilder(
-        future: _getServer(),
+        future: _getAboutText(),
         builder: (context, AsyncSnapshot<String> snapshot) {
           if(snapshot.hasData && snapshot.data != null) {
             return Markdown(
@@ -54,7 +54,7 @@ class AboutPage extends State<AboutPageStarter> {
     return scaffold;
   }
 
-  Future<String> _getServer() async {
+  Future<String> _getAboutText() async {
     String server = "";
     await Settings().getString("server", "").then((value) => server = value!);
 
