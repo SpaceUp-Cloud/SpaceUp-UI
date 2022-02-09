@@ -118,6 +118,7 @@ class SettingsPage extends State<SettingsPageStarter> {
     final settingsList = SettingsScreen(
       title: "SpaceUp Settings",
       children: submenus,
+      appBarBackgroundColor: Theme.of(context).primaryColor,
     );
 
     return ThemeSwitchingArea(
