@@ -93,7 +93,6 @@ class Util {
       if(!JwtDecoder.isExpired(jwt)) {
         // When are on the login page, we want to login
         var currentRoute = Get.currentRoute;
-        print(currentRoute);
         if(currentRoute == UIData.loginRoute || currentRoute == "/") {
           Util.login(context);
         }
