@@ -62,7 +62,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     super.dispose();
-    _timer.cancel();
+    try {
+      _timer.cancel();
+    } catch(ex) {
+      print("Time was not initialized");
+    }
   }
 
   @override
