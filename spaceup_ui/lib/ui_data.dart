@@ -29,24 +29,17 @@ class ThemeConfig {
 
   static ThemeData get lightMode {
     return ThemeData(
+        useMaterial3: true,
         brightness: Brightness.light,
-        primaryColor: Colors.teal,
-        primarySwatch: Colors.teal,
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal,
-            brightness: Brightness.light)
-            .copyWith(secondary: Colors.teal.shade300)
+        colorSchemeSeed: Colors.teal,
     );
   }
 
   static ThemeData get darkMode {
     return ThemeData(
+      useMaterial3: true,
       brightness: Brightness.dark,
-      primaryColor: Colors.teal.shade700,
-      primaryColorDark: Colors.white,
-      primarySwatch: Colors.teal,
-      colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal,
-          brightness: Brightness.dark)
-          .copyWith(secondary: Colors.teal.shade500),
+      colorSchemeSeed: Colors.teal.shade700,
     );
   }
 }

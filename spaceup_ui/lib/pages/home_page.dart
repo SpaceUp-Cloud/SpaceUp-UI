@@ -94,7 +94,10 @@ class _HomePageState extends State<HomePage> {
                           future: _getConnectedServer(),
                           builder: (context, snapshot) {
                             if(snapshot.hasData) {
-                              return Text(snapshot.data as String);
+                              return Text(snapshot.data as String,
+                                style: TextStyle(
+                                  color: Colors.white
+                                ),);
                             } else {
                               return CircularProgressIndicator();
                             }

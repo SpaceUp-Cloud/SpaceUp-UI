@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/pages/logs_page.dart';
+import 'package:spaceup_ui/style.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
@@ -151,7 +152,7 @@ class ServicesPage extends State<ServicesPageStarter> {
               child: ColoredBox(
                 color: (service.status == "FATAL" || service.status == "STOPPED")
                     ? Colors.orange
-                    : theme.colorScheme.secondary,
+                    : theme.colorScheme.secondaryContainer,
                 child: ListTile(
                   leading: Icon(Icons.miscellaneous_services),
                   title: Text(service.name),
@@ -163,7 +164,7 @@ class ServicesPage extends State<ServicesPageStarter> {
           back: Container(
             color: (service.status == "FATAL" || service.status == "STOPPED")
                 ? Colors.orange
-                : theme.colorScheme.secondary,
+                : theme.colorScheme.secondaryContainer,
             child: ListView(
               children: [
                 GridView.count(

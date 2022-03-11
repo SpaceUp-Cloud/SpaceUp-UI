@@ -37,6 +37,18 @@ class _LoginState extends State<LoginPage> {
     super.initState();
     Util.checkJWT(context);
     getUserSettings();
+
+    // 1. Check if we have a valid url
+    // 2. if yes, check if we are installed correctly
+
+    // ... else
+    // 1. we have to enter a valid url
+    // 2. check if we are installed correctly
+
+    // ... else
+    // 1. if not valid
+    // 2. show check url
+    // 3. check if we are installed correctly
   }
 
   @override

@@ -17,7 +17,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   if (Util().isDesktop) {
     final minSize = const Size(400, 700);
-    final maxSize = const Size(600, 1400);
+    final maxSize = const Size(1200, 1400);
     setWindowMinSize(minSize);
     setWindowMaxSize(maxSize);
   }
@@ -34,15 +34,22 @@ class MyApp extends StatelessWidget {
     WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
         ? ThemeConfig.darkMode : ThemeConfig.lightMode;
 
+    final window = WidgetsBinding.instance!.window;
+    window.onPlatformBrightnessChanged = () {
+      print("Theme mode changed");
+      WidgetsBinding.instance?.handlePlatformBrightnessChanged();
+      themeData = window.platformBrightness == Brightness.dark
+          ? ThemeConfig.darkMode : ThemeConfig.lightMode;
+    };
+
     Settings().getString("theme", "system").then((value) => {
       if(value == 'light') {
         themeData = ThemeConfig.lightMode
       } else if(value == 'dark') {
         themeData = ThemeConfig.darkMode
       }  else {
-        themeData =
-        WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
-        ? ThemeConfig.darkMode : ThemeConfig.lightMode
+        themeData = window.platformBrightness == Brightness.dark
+            ? ThemeConfig.darkMode : ThemeConfig.lightMode
       }
     });
 
@@ -53,7 +60,9 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           title: 'SpaceUp Client',
           debugShowCheckedModeBanner: false,
+          //themeMode: ThemeMode.system,
           theme: myTheme,
+          darkTheme: ThemeConfig.darkMode,
           home: LoginPage(),
           initialRoute: '/',
           onGenerateRoute: (RouteSettings settings) {

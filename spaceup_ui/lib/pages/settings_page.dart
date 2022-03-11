@@ -51,11 +51,10 @@ class SettingsPage extends State<SettingsPageStarter> {
             ThemeSwitcher(
               clipper: ThemeSwitcherCircleClipper(),
               builder: (context) {
-                return OutlinedButton(
+                return MaterialButton(
                   child: Text('Apply Theme'),
                   onPressed: () {
-                    Future.delayed(Duration(microseconds: 500), () =>
-                        changeTheme(context));
+                    changeTheme(context);
                   },
                 );
               },
@@ -137,12 +136,8 @@ class SettingsPage extends State<SettingsPageStarter> {
     WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
         ? ThemeConfig.darkMode : ThemeConfig.lightMode;
 
-    print(systemMode);
     if (themeMode == 'system') {
-      //var brightness = ThemeProvider.of(context)!.brightness;
-
       ThemeSwitcher.of(context).changeTheme(
-          //isReversed: brightness == Brightness.dark ? true : false,
           theme: systemMode
       );
     } else if (themeMode == 'dark') {
