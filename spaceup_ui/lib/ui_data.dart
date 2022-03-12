@@ -29,7 +29,7 @@ class ThemeConfig {
 
   static ThemeData get lightMode {
     return ThemeData(
-        useMaterial3: true,
+        //useMaterial3: true,
         brightness: Brightness.light,
         colorSchemeSeed: Colors.teal,
     );
@@ -37,7 +37,7 @@ class ThemeConfig {
 
   static ThemeData get darkMode {
     return ThemeData(
-      useMaterial3: true,
+      //useMaterial3: true,
       brightness: Brightness.dark,
       colorSchemeSeed: Colors.teal.shade700,
     );

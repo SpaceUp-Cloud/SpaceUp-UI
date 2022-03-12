@@ -17,11 +17,12 @@ class LoginPage extends StatefulWidget {
 
 class _LoginState extends State<LoginPage> {
   late ThemeData theme;
-  
+
   final urlText = TextEditingController();
   final usernameText = TextEditingController();
   final passwordText = TextEditingController();
   late bool rememberLogin = false;
+  late bool autoLogin = false;
 
   final showSetUpSpaceUp = ValueNotifier<bool>(false);
   final showLogin = ValueNotifier<bool>(false);
@@ -29,6 +30,7 @@ class _LoginState extends State<LoginPage> {
 
   // If this is true, we can directly go to login
   late bool isValidSetUp = false;
+
   // And if this is true, well. We can even directly log in.
   late bool isValidJWT = false;
 
@@ -36,10 +38,24 @@ class _LoginState extends State<LoginPage> {
   void initState() {
     super.initState();
     Util.checkJWT(context);
-    getUserSettings();
+    getUserSettings().then((value) => initialize());
+  }
 
+  void initialize() {
     // 1. Check if we have a valid url
     // 2. if yes, check if we are installed correctly
+    // 3. login
+    if (urlText.value.text.isNotEmpty) {
+      _validateUrl().then((value) => {
+            if (showLogin.value && autoLogin
+                  && usernameText.value.text.isNotEmpty &&
+                  passwordText.value.text.isNotEmpty) {
+                  _login()
+            } else {
+              // Assume we have to setup spaceup
+            }
+          });
+    }
 
     // ... else
     // 1. we have to enter a valid url
@@ -61,26 +77,25 @@ class _LoginState extends State<LoginPage> {
           title: Text("SpaceUp Login"),
         ),
         body: Padding(
-          padding: EdgeInsets.all(10.0),
-          child: AnimatedBuilder(
-            animation: showCheckUrl,
-            builder: (context, _) {
-              if(showCheckUrl.value) {
-                return _serverUrlForm();
-              } else {
-                return AnimatedBuilder(
-                    animation: showLogin,
-                    builder: (context, _) {
-                      return _loginForm();
-                    });
-              }
-            },
-          )
-        ));
+            padding: EdgeInsets.all(10.0),
+            child: AnimatedBuilder(
+              animation: showCheckUrl,
+              builder: (context, _) {
+                if (showCheckUrl.value) {
+                  return _serverUrlForm();
+                } else {
+                  return AnimatedBuilder(
+                      animation: showLogin,
+                      builder: (context, _) {
+                        return _loginForm();
+                      });
+                }
+              },
+            )));
 
     return scaffold;
   }
-  
+
   Center _serverUrlForm() {
     return Center(
       child: ListView(
@@ -102,8 +117,7 @@ class _LoginState extends State<LoginPage> {
                   textColor: Colors.white,
                   color: theme.colorScheme.secondary,
                   child: Text('Validate'),
-                  onPressed: _validateUrl)
-          )
+                  onPressed: _validateUrl))
         ],
       ),
     );
@@ -137,8 +151,7 @@ class _LoginState extends State<LoginPage> {
                 textColor: Colors.white,
                 color: theme.colorScheme.secondary,
                 child: Text('Login'),
-                onPressed: _login)
-        ),
+                onPressed: _login)),
         Container(
           child: CheckboxListTile(
             title: Text('Remember Login?'),
@@ -155,30 +168,39 @@ class _LoginState extends State<LoginPage> {
       ],
     );
   }
-  
+
   Future<void> _validateUrl() async {
     final httpClient = http.Client();
     final client = RetryClient(httpClient);
 
+    final url = urlText.value.text;
     try {
-      final url = urlText.value.text;
-      if(url.isNotEmpty) {
+      if (url.isNotEmpty) {
         var uri = Uri.tryParse('$url/api/system/installed');
         var response = await client.get(uri!);
         print(response.body);
         try {
           var parsed = json.decode(response.body).cast<String, dynamic>();
           showCheckUrl.value = false;
-          if(parsed["isInstalled"] == true) {
+          if (parsed["isInstalled"] == true) {
+            showSetUpSpaceUp.value = false;
             showLogin.value = true;
           } else {
+            showLogin.value = false;
             showSetUpSpaceUp.value = true;
           }
           Settings().save("server", url);
-        } catch(ex) {
+          Util.showMessage(context, "Connected with $url",
+              durationInSeconds: 5);
+        } catch (ex) {
+          Util.showMessage(context, "Unable to validate installation for $url",
+              durationInSeconds: 5);
           Error();
         }
       }
+    } catch (ex) {
+      Util.showMessage(context, "Cannot connect to $url", durationInSeconds: 5);
+      Error();
     } finally {
       client.close();
     }
@@ -223,15 +245,17 @@ class _LoginState extends State<LoginPage> {
   }
 
   Future<void> getUserSettings() async {
-    bool isrememberLogin = await Settings().getBool("rememberLogin", false);
-    print("Remember login: $isrememberLogin");
+    bool isRememberLogin = await Settings().getBool("rememberLogin", false);
+    bool isAutoLogin = await Settings().getBool("autoLogin", false);
+    print("Remember login: $isRememberLogin");
+    print("Auto login: $isAutoLogin");
 
     setState(() {
-      rememberLogin = isrememberLogin;
+      rememberLogin = isRememberLogin;
+      autoLogin = isAutoLogin;
     });
 
-
-    if(isrememberLogin) {
+    if (isRememberLogin) {
       urlText.text = (await Settings().getString("server", "https://"))!;
       usernameText.text = (await Settings().getString("username", ""))!;
       passwordText.text = (await Settings().getString("password", ""))!;

@@ -24,7 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  animated_theme_switcher: ^2.0.6
+  adaptive_theme: ^2.3.0
   flip_card: ^0.6.0
   #local_auth: ^1.1.5
   http: ^0.13.2

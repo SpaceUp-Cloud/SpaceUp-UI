@@ -1,4 +1,4 @@
-import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
@@ -13,56 +13,48 @@ import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 import 'package:window_size/window_size.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
   if (Util().isDesktop) {
     final minSize = const Size(400, 700);
     final maxSize = const Size(1200, 1400);
     setWindowMinSize(minSize);
     setWindowMaxSize(maxSize);
   }
-  runApp(MyApp());
+  runApp(MyApp(savedThemeMode: savedThemeMode));
 }
 
 class MyApp extends StatelessWidget {
+  final AdaptiveThemeMode? savedThemeMode;
+
   // This widget is the root of your application.
-  MyApp() : super();
+  MyApp({Key? key, this.savedThemeMode}) : super();
 
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData =
-    WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
-        ? ThemeConfig.darkMode : ThemeConfig.lightMode;
-
-    final window = WidgetsBinding.instance!.window;
-    window.onPlatformBrightnessChanged = () {
-      print("Theme mode changed");
-      WidgetsBinding.instance?.handlePlatformBrightnessChanged();
-      themeData = window.platformBrightness == Brightness.dark
-          ? ThemeConfig.darkMode : ThemeConfig.lightMode;
-    };
 
     Settings().getString("theme", "system").then((value) => {
       if(value == 'light') {
-        themeData = ThemeConfig.lightMode
+        AdaptiveTheme.of(context).setLight()
       } else if(value == 'dark') {
-        themeData = ThemeConfig.darkMode
-      }  else {
-        themeData = window.platformBrightness == Brightness.dark
-            ? ThemeConfig.darkMode : ThemeConfig.lightMode
-      }
+        AdaptiveTheme.of(context).setDark()
+      }/*  else {
+        AdaptiveTheme.of(context).setSystem()
+      }*/
     });
 
-    return ThemeProvider(
-      initTheme: themeData,
-      builder: (_, myTheme) {
-        print("Theme mode: ${myTheme.brightness}");
+    return AdaptiveTheme(
+      initial: savedThemeMode ?? AdaptiveThemeMode.system,
+      light: ThemeConfig.lightMode,
+      dark: ThemeConfig.darkMode,
+      builder: (theme, darkTheme) {
         return GetMaterialApp(
           title: 'SpaceUp Client',
           debugShowCheckedModeBanner: false,
-          //themeMode: ThemeMode.system,
-          theme: myTheme,
-          darkTheme: ThemeConfig.darkMode,
+          themeMode: ThemeMode.system,
+          theme: theme,
+          darkTheme: darkTheme,
           home: LoginPage(),
           initialRoute: '/',
           onGenerateRoute: (RouteSettings settings) {

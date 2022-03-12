@@ -52,8 +52,10 @@ class Util {
     }
   }
 
-  static void showMessage(BuildContext context, String msg) {
-    final snackBar = SnackBar(content: Text(msg));
+  static void showMessage(BuildContext context, String msg,
+      {int durationInSeconds = 2}) {
+
+    final snackBar = SnackBar(content: Text(msg), duration: Duration(seconds: durationInSeconds),);
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
@@ -79,12 +81,10 @@ class Util {
     }
 
     Get.offAll(() => LoginPage());
-    showMessage(context, "You have been logged out!");
   }
 
   static Future<void> login(BuildContext context) async {
     Get.offAll(() => HomePage("Home"));
-    showMessage(context, "You have been logged in!");
   }
 
   static Future<void> checkJWT(BuildContext context) async {

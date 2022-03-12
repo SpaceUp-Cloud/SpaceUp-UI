@@ -1,9 +1,8 @@
 import 'dart:io' show Platform;
 
-import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
-import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
 class SettingsPageStarter extends StatefulWidget {
@@ -14,7 +13,6 @@ class SettingsPageStarter extends StatefulWidget {
 }
 
 class SettingsPage extends State<SettingsPageStarter> {
-
   // Add desktop/web specific settings
   //get desktopAndWebSettings =>
 
@@ -24,60 +22,57 @@ class SettingsPage extends State<SettingsPageStarter> {
     final isPartlyDesktop = (!util.isDesktop || Platform.isLinux);
 
     final submenus = <Widget>[];
-    submenus.add(
-        SwitchSettingsTile(
-          settingKey: 'refreshView',
-          icon: Icon(Icons.refresh),
-          title: 'Automatically refresh views',
-          defaultValue: true,
+    submenus.add(SwitchSettingsTile(
+      settingKey: 'refreshView',
+      icon: Icon(Icons.refresh),
+      title: 'Automatically refresh views',
+      defaultValue: true,
+    ));
+    submenus.add(SwitchSettingsTile(
+        settingKey: "rememberLogin",
+        title: "Remember login"
+    ));
+    submenus.add(SwitchSettingsTile(
+        settingKey: "autoLogin",
+        title: "Auto login"
+    ));
+    submenus.add(SettingsTileGroup(
+      title: 'Theme',
+      children: [
+        RadioSettingsTile(
+          icon: Icon(Icons.wb_sunny),
+          defaultKey: 'system',
+          settingKey: 'themeMode',
+          expandable: true,
+          title: 'Theme mode',
+          values: {
+            'system': 'System mode',
+            'light': 'Light mode',
+            'dark': 'Dark mode'
+          },
+        ),
+        MaterialButton(
+          child: Text('Apply Theme'),
+          onPressed: () {
+            changeTheme(context);
+          },
         )
-    );
-    submenus.add(
-        SettingsTileGroup(
-          title: 'Theme',
-          children: [
-            RadioSettingsTile(
-              icon: Icon(Icons.wb_sunny),
-              defaultKey: 'system',
-              settingKey: 'themeMode',
-              expandable: true,
-              title: 'Theme mode',
-              values: {
-                'system': 'System mode',
-                'light': 'Light mode',
-                'dark': 'Dark mode'
-              },
-            ),
-            ThemeSwitcher(
-              clipper: ThemeSwitcherCircleClipper(),
-              builder: (context) {
-                return MaterialButton(
-                  child: Text('Apply Theme'),
-                  onPressed: () {
-                    changeTheme(context);
-                  },
-                );
-              },
-            )
-          ],
-        )
-    );
+      ],
+    ));
 
     if (util.isMobile) {
       // ... mobile specific
-      submenus.add(
-          SettingsTileGroup(
-            title: 'App',
-            children: [
-              SwitchSettingsTile(
-                title: 'Fingerprint enabled',
-                icon: Icon(Icons.fingerprint),
-                settingKey: "fingerprint_enabled",
-                defaultValue: false,
-              ),
-            ],
-          )
-      );
+      submenus.add(SettingsTileGroup(
+        title: 'App',
+        children: [
+          SwitchSettingsTile(
+            title: 'Fingerprint enabled',
+            icon: Icon(Icons.fingerprint),
+            settingKey: "fingerprint_enabled",
+            defaultValue: false,
+          ),
+        ],
+      ));
     }
     if (util.isWeb) {
       // ... web specific
@@ -89,30 +84,25 @@ class SettingsPage extends State<SettingsPageStarter> {
 
     // Das not work yet on desktop (except Linux) but web
     if (isPartlyDesktop || util.isWeb) {
-      submenus.add(
-          SettingsTileGroup(
-            title: 'Behaviour',
-            children: [
-              SwitchSettingsTile(
-                title: 'Cached Domains',
-                settingKey: "isCachedDomain",
-                defaultValue: false,
-              )
-            ],
+      submenus.add(SettingsTileGroup(
+        title: 'Behaviour',
+        children: [
+          SwitchSettingsTile(
+            title: 'Cached Domains',
+            settingKey: "isCachedDomain",
+            defaultValue: false,
           )
-      );
+        ],
+      ));
     }
 
     if (util.isDesktop && !isPartlyDesktop && !util.isWeb) {
-      submenus.add(
-          SettingsContainer(
-            child: Text("Does not work yet on this desktop."),
-          )
-      );
+      submenus.add(SettingsContainer(
+        child: Text("Does not work yet on this desktop."),
+      ));
     }
 
     // ... for all platforms
-
 
     final settingsList = SettingsScreen(
       title: "SpaceUp Settings",
@@ -120,35 +110,19 @@ class SettingsPage extends State<SettingsPageStarter> {
       appBarBackgroundColor: Theme.of(context).primaryColor,
     );
 
-    return ThemeSwitchingArea(
-        child: Scaffold(
-            body: settingsList
-        ));
+    return Scaffold(body: settingsList);
   }
 
   Future<void> changeTheme(BuildContext context) async {
     String themeMode = (await Settings().getString("themeMode", "system"))!;
     print("Change theme $themeMode");
 
-    final lightMode = ThemeConfig.lightMode;
-    final darkMode = ThemeConfig.darkMode;
-    final systemMode =
-    WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
-        ? ThemeConfig.darkMode : ThemeConfig.lightMode;
-
     if (themeMode == 'system') {
-      ThemeSwitcher.of(context).changeTheme(
-          theme: systemMode
-      );
+      AdaptiveTheme.of(context).setSystem();
     } else if (themeMode == 'dark') {
-      ThemeSwitcher.of(context).changeTheme(
-          theme: darkMode
-      );
+      AdaptiveTheme.of(context).setDark();
     } else {
-      ThemeSwitcher.of(context).changeTheme(
-          theme: lightMode
-      );
+      AdaptiveTheme.of(context).setLight();
     }
   }
-
 }
