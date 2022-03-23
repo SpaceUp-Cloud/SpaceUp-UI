@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+
 import 'package:spaceup_ui/util.dart';
 
 import '../ui_data.dart';
@@ -19,7 +19,8 @@ class LoginPage extends StatefulWidget {
 class _LoginState extends State<LoginPage> {
   late ThemeData theme;
 
-  static const maxSteps = 4;
+  late int maxSteps = 3;
+  final nextStep = ValueNotifier<int>(0);
 
   // validating forms
   final _formApiKey = GlobalKey<FormState>();
@@ -67,13 +68,6 @@ class _LoginState extends State<LoginPage> {
   // 2 - login
   final showProcess = ValueNotifier<int>(0);
 
-  /*final showCheckUrl = ValueNotifier<bool>(false); // Revert to true
-  final showSetUpSpaceUp = ValueNotifier<bool>(true); // Revert to false
-  final showLogin = ValueNotifier<bool>(false);*/
-
-  // For progressbar
-  double progress = 0.0;
-
   // If this is true, we can directly go to login
   late bool isValidSetUp = false;
 
@@ -83,34 +77,22 @@ class _LoginState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    Util.checkJWT(context)
-        .then((value) => {getUserSettings().then((value) => initialize())});
+
+    progressValue.value = (nextStep.value / maxSteps).toDouble();
+    nextStep.addListener(() {
+      showStepText.value = "${nextStep.value} of / $maxSteps";
+      progressValue.value = (nextStep.value / maxSteps).toDouble();
+      print("Current progress ${progressValue.value}, step: ${nextStep.value}, maxSteps: $maxSteps");
+    });
+
+    getUserSettings().then((value) => initialize());
   }
 
   void initialize() {
     // 1. Check if we have a valid url
     // 2. if yes, check if we are installed correctly
     // 3. login
-    if (showProcess == 0 && urlText.value.text.isNotEmpty) {
-      _validateUrl().then((value) => {
-            if (showProcess.value == 2 &&
-                usernameText.value.text.isNotEmpty &&
-                passwordText.value.text.isNotEmpty)
-              {titleText.value == "Login", _login()}
-            else if (showProcess == 1)
-              {
-                // Assume we have to setup spaceup
-                showProgressBar.value = true
-              }
-          });
-    } else {
-      // Assume we have to setup spaceup
-      titleText.value = "Set API Key";
-      showStepText.value = "1 / $maxSteps";
-      showProgressBar.value = true;
-      progressValue.value = 0.0;
-      showProcess.value = 1;
-    }
+
 
     // ... else
     // 1. we have to enter a valid url
@@ -120,6 +102,25 @@ class _LoginState extends State<LoginPage> {
     // 1. if not valid
     // 2. show check url
     // 3. check if we are installed correctly
+    if (showProcess.value == 0 && urlText.value.text.isNotEmpty) {
+      _validateUrl().then((value) async => {
+            if (showProcess.value == 2 &&
+                usernameText.value.text.isNotEmpty &&
+                passwordText.value.text.isNotEmpty) {
+                  titleText.value = "Login",
+                  if(autoLogin) _login()
+            }
+            else if (showProcess == 1)
+              {
+                // Assume we have to setup spaceup
+                _setup()
+              }
+          });
+    } else {
+      // Assume we have to setup spaceup
+      showProcess.value = 0;
+    }
+
   }
 
   @override
@@ -138,10 +139,9 @@ class _LoginState extends State<LoginPage> {
         animation: showProgressBar,
         builder: (context, _) {
           return LinearProgressIndicator(
-            //Theme.of(context).primaryColor
             minHeight: 10.0,
             backgroundColor: Theme.of(context).backgroundColor,
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+            //valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).pr),
             value: progressValue.value,
           );
         },
@@ -173,6 +173,13 @@ class _LoginState extends State<LoginPage> {
     return scaffold;
   }
 
+  void _setup() {
+    titleText.value = "Set API Key";
+    nextStep.value = 1;
+    showProgressBar.value = true;
+    showProcess.value = 1;
+  }
+
   Center _serverUrlForm() {
     return Center(
       child: ListView(
@@ -190,9 +197,8 @@ class _LoginState extends State<LoginPage> {
           Container(
               height: 50,
               padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: MaterialButton(
-                  textColor: Colors.white,
-                  color: theme.colorScheme.secondary,
+              child: OutlinedButton(
+                  style: flatButtonStyle,
                   child: Text('Validate'),
                   onPressed: _validateUrl))
         ],
@@ -205,27 +211,23 @@ class _LoginState extends State<LoginPage> {
     return AnimatedBuilder(
       animation: showStepText,
       builder: (context, _) {
-        switch (showStepText.value) {
-          case "1 / $maxSteps":
+        switch (nextStep.value) {
+          case 1:
             {
               return _apiKeyForm();
             }
-          case "2 / $maxSteps":
+          case 2:
             {
               return _userForm();
             }
-          case "3 / $maxSteps":
+          case 3:
             {
               return _sshForm();
-            }
-          case "4 / $maxSteps":
-            {
-              return _finalizeForm();
             }
           default:
             {
               return Container(
-                child: Text("Unknown step. That's a bug!"),
+                child: Text("Unknown step: ${nextStep.value}. That's a bug!"),
               );
             }
         }
@@ -233,6 +235,7 @@ class _LoginState extends State<LoginPage> {
     );
   }
 
+  @setup
   Form _apiKeyForm() {
     return Form(
       key: _formApiKey,
@@ -256,23 +259,29 @@ class _LoginState extends State<LoginPage> {
               ),
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (_formApiKey.currentState!.validate()) {
-                setState(() {
-                  titleText.value = "Create SpaceUp User";
-                  showStepText.value = "2 / $maxSteps";
-                  progressValue.value = 0.25;
-                });
-              }
-            },
-            child: Text("Next"),
+          Container(
+              height: 50,
+              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+              child: OutlinedButton(
+                style: flatButtonStyle,
+                //color: theme.colorScheme.primary,
+                onPressed: () {
+                  if (_formApiKey.currentState!.validate()) {
+                    setState(() {
+                      titleText.value = "Create SpaceUp User";
+                      nextStep.value = 2;
+                    });
+                  }
+                },
+                child: Text("Next"),
+              )
           )
         ],
       ),
     );
   }
 
+  @setup
   Form _userForm() {
     return Form(
         key: _formKeyUser,
@@ -354,23 +363,25 @@ class _LoginState extends State<LoginPage> {
                     )),
               ),
             ),
-            ElevatedButton(
-                onPressed: () {
+            Container(
+                height: 50,
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: OutlinedButton(
+                    style: flatButtonStyle,
+                    onPressed: () {
                       if (_formKeyUser.currentState!.validate()) {
-                          // submit user
-                          //_processSetupUser()
-                          setState(() {
-                            titleText.value = "Set SSH credentials";
-                            showStepText.value = "3 / $maxSteps";
-                            progressValue.value = 0.50;
-                          });
-                        }
+                        // submit user
+                        _createUser();
+                      }
                     },
-                child: Text('Next'))
+                    child: Text('Next')
+                )
+            )
           ],
         ));
   }
 
+  @setup
   Form _sshForm() {
     return Form(
         key: _formKeySsh,
@@ -471,43 +482,22 @@ class _LoginState extends State<LoginPage> {
                     )),
               ),
             ),
-            ElevatedButton(
-                onPressed: () {
+            Container(
+                height: 50,
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: OutlinedButton(
+                    style: flatButtonStyle,
+                    onPressed: () {
                       if (_formKeySsh.currentState!.validate())
-                        {
-                          // submit user
-                          //_processSetupUser()
-                          setState(() {
-                            titleText.value = "Finish it!";
-                            showStepText.value = "4 / $maxSteps";
-                            progressValue.value = 0.75;
-                          });
-                        }
+                      {
+                        _createSshUser();
+                      }
                     },
-                child: Text('Next'))
+                    child: Text('Next')
+                )
+            )
           ],
         ));
-  }
-
-  Form _finalizeForm() {
-    return Form(
-        key: _formKeyFinalize,
-        child: Center(
-          child: ElevatedButton(
-            onPressed: () {
-              if(_formKeyFinalize.currentState!.validate()) {
-                Util.showMessage(context, "Great! You finished the SpaceUp setup!");
-                setState(() {
-                  showProgressBar.value = false;
-                  titleText.value = "Login";
-                  showProcess.value = 2;
-                });
-              }
-            },
-            child: Text("Next"),
-          ),
-        )
-    );
   }
 
   ListView _loginForm() {
@@ -534,9 +524,8 @@ class _LoginState extends State<LoginPage> {
         Container(
             height: 50,
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: MaterialButton(
-                textColor: Colors.white,
-                color: theme.colorScheme.secondary,
+            child: OutlinedButton(
+                style: flatButtonStyle,
                 child: Text('Login'),
                 onPressed: _login)),
         Container(
@@ -571,18 +560,20 @@ class _LoginState extends State<LoginPage> {
           if (parsed["isInstalled"] == true) {
             showProcess.value = 2;
           } else {
-            showProcess.value = 1;
+            _setup();
           }
           Settings().save("server", url);
           Util.showMessage(context, "Connected with $url",
               durationInSeconds: 5);
         } catch (ex) {
-          Util.showMessage(context, "Unable to validate installation for $url",
+          Util.showMessage(context, "Unable to validate installation for $url.",
               durationInSeconds: 5);
           Error();
         }
       }
     } catch (ex) {
+      print(ex);
+      showProcess.value = 0;
       Util.showMessage(context, "Cannot connect to $url", durationInSeconds: 5);
       Error();
     } finally {
@@ -616,14 +607,111 @@ class _LoginState extends State<LoginPage> {
         Settings().save("password", password);
         Settings().save("rememberLogin", rememberLogin);
 
-        if (autoLogin) {
-          Util.login(context);
-        }
+        Util.login(context);
       } else {
+        final serverMsg = response.body.isNotEmpty
+            ? jsonDecode(response.body)["_embedded"]["errors"][0]["message"]
+            : "Code: ${response.statusCode}";
         String msg = response.statusCode == 401
             ? "Wrong credentials"
-            : "Code: ${response.statusCode}";
-        Util.showMessage(context, "Error: $msg");
+            : serverMsg;
+        Util.showMessage(context, "Error: $msg", durationInSeconds: 10);
+      }
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<void> _createUser() async {
+    final httpClient = http.Client();
+    final client = RetryClient(httpClient);
+
+    final apiKey = apikey.value.text;
+    final username = usernameText.value.text;
+    final password = passwordText.value.text;
+
+    final body = jsonEncode({'username': username, 'password': password});
+
+    try {
+      var url = urlText.value.text;
+      var uri = Uri.tryParse('$url/api/installer/createUser');
+      var response = await client.post(uri!,
+          headers: {"Content-Type": "application/json", "X-SpaceUp-Key": apiKey},
+          body: body
+      );
+
+      if (response.statusCode == 200) {
+        Settings().save("username", username);
+        Settings().save("password", password);
+
+        setState(() {
+          titleText.value = "Set SSH credentials";
+          nextStep.value = 3;
+        });
+      } else {
+        final msg = response.body;
+        Util.showMessage(context, "Error: $msg", durationInSeconds: 5);
+      }
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<void> _createSshUser() async {
+    final httpClient = http.Client();
+    final client = RetryClient(httpClient);
+
+    final apiKey = apikey.value.text;
+    final username = usernameSshText.value.text;
+    final password = passwordSshText.value.text;
+    final sshServer = serverSshText.value.text;
+
+    final body = jsonEncode(
+        {'username': username, 'password': password, 'server': sshServer}
+    );
+
+    try {
+      var url = urlText.value.text;
+      var uri = Uri.tryParse('$url/api/installer/createSshSetup');
+      var response = await client.post(uri!,
+          headers: {"Content-Type": "application/json", "X-SpaceUp-Key": apiKey},
+          body: body
+      );
+
+      if (response.statusCode == 200) {
+        _finalizeInstallation();
+      } else {
+        final msg = response.body;
+        Util.showMessage(context, "Error: $msg", durationInSeconds: 5);
+      }
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<void> _finalizeInstallation() async {
+    final httpClient = http.Client();
+    final client = RetryClient(httpClient);
+
+    final apiKey = apikey.value.text;
+
+    try {
+      var url = urlText.value.text;
+      var uri = Uri.tryParse('$url/api/installer/final');
+      var response = await client.post(uri!,
+          headers: {"X-SpaceUp-Key": apiKey}
+      );
+
+      if (response.statusCode == 200) {
+        Util.showMessage(context, "Great! You finished the SpaceUp setup!");
+        setState(() {
+          titleText.value = "Login";
+          showProgressBar.value = false;
+          showProcess.value = 2;
+        });
+      } else {
+        final msg = response.body;
+        Util.showMessage(context, "Error: $msg", durationInSeconds: 5);
       }
     } finally {
       client.close();
@@ -642,9 +730,26 @@ class _LoginState extends State<LoginPage> {
     });
 
     if (isRememberLogin) {
-      urlText.text = (await Settings().getString("server", "https://"))!;
+      urlText.text = (await Settings().getString("server", ""))!;
       usernameText.text = (await Settings().getString("username", ""))!;
       passwordText.text = (await Settings().getString("password", ""))!;
     }
   }
 }
+
+final ButtonStyle flatButtonStyle = TextButton.styleFrom(
+  minimumSize: Size(88, 36),
+  padding: EdgeInsets.symmetric(horizontal: 16.0),
+  shape: const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(2.0)),
+  ),
+);
+
+/**
+ * Method annotation
+ */
+class Setup {
+  const Setup();
+}
+
+const setup = Setup();
