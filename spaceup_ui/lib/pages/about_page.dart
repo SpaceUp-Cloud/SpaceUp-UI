@@ -80,7 +80,9 @@ class AboutPage extends State<AboutPageStarter> {
 For documentations open the [website]($server) of your installed SpaceUp.
 
 Licenses:  
+
 [SpaceUp-Ui License](https://git.iatlas.dev/SpaceUp/SpaceUp-UI)  
+  
 [SpaceUp-Server License](https://git.iatlas.dev/SpaceUp/SpaceUp-Server)
 ''';
 
