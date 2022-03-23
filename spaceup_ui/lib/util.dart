@@ -59,8 +59,12 @@ class Util {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Future<Map<String, String>> getJWT(BuildContext context) async {
-    checkJWT(context);
+  Future<Map<String, String>> getJWT(BuildContext context, {bool autologin = true}) async {
+    if(autologin) {
+      print("Autologin");
+      checkJWT(context);
+    }
+
     String jwt = (await Settings().getString("jwt", ""))!;
     Map<String, String> headers = {
       "Authorization": 'Bearer $jwt',
@@ -75,7 +79,7 @@ class Util {
 
     bool rememberLogin = await Settings().getBool("rememberLogin", false);
     if(!rememberLogin) {
-      Settings().save("server", "https://");
+      Settings().save("server", "");
       Settings().save("username", "");
       Settings().save("password", "");
     }
