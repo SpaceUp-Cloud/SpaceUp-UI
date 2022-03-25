@@ -3,7 +3,7 @@
     package="technology.iatlas.spaceup.spaceup_ui">
 
     <application
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:label="SpaceUp Client"
         tools:targetApi="m">
         <activity
