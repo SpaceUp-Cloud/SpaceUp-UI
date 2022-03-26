@@ -45,7 +45,7 @@ class ServicesPage extends State<ServicesPageStarter> {
     super.dispose();
     try {
       _timer.cancel();
-    } catch(ex) {
+    } catch (ex) {
       print("Time was not initialized");
     }
   }
@@ -59,8 +59,7 @@ class ServicesPage extends State<ServicesPageStarter> {
         controller: scrollController,
         child: Container(
           child: createServicCards(),
-        )
-    );
+        ));
 
     final scaffold = Scaffold(
       appBar: AppBar(
@@ -109,83 +108,64 @@ class ServicesPage extends State<ServicesPageStarter> {
     if (services.isEmpty) return cards;
 
     services.forEach((service) {
-      var actionButtons = [
-        ListTile(
-          contentPadding: EdgeInsets.only(left: 5, right: 0),
-          title: Text(service.name),
-        ),
-        ListTile(
-          contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Text('Logs'),
-          onTap: () {
-            Get.to(() => LogsPageStarter(service.name));
-          },
-        ),
-        ListTile(
-          contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Text('Start'),
-          onTap: () {
-            _doServiceAction(service.name, "START");
-          },
-        ),
-        ListTile(
-          contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Text('Stop'),
-          onTap: () {
-            _doServiceAction(service.name, "STOP");
-          },
-        ),
-        ListTile(
-          contentPadding: EdgeInsets.only(left: 0, right: 0),
-          title: Text('Restart'),
-          onTap: () {
-            _doServiceAction(service.name, "RESTART");
-          },
-        )
-      ];
-
-      var card = FlipCard(
-          fill: Fill.fillBack,
-          controller: flipCardController,
-          direction: FlipDirection.VERTICAL,
-          front: Column(children: <Widget>[
-            Container(
-              height: 75,
-              child: ColoredBox(
-                color: (service.status == "FATAL" || service.status == "STOPPED")
-                    ? Colors.deepOrangeAccent
-                    : theme.colorScheme.secondaryContainer,
-                child: ListTile(
-                  leading: Icon(Icons.miscellaneous_services),
-                  title: Text(service.name),
-                  subtitle: Text(service.info),
+      var card = Card(
+          child: Column(children: <Widget>[
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 75,
+                child: ColoredBox(
+                  color:
+                      (service.status == "FATAL" || service.status == "STOPPED")
+                          ? Colors.deepOrangeAccent
+                          : theme.colorScheme.secondaryContainer,
+                  child: ListTile(
+                    leading: Icon(Icons.miscellaneous_services),
+                    title: Text(service.name),
+                    subtitle: Text(service.info),
+                  ),
                 ),
               ),
-            )
-          ]),
-          back: Container(
-            color: (service.status == "FATAL" || service.status == "STOPPED")
-                ? Colors.deepOrangeAccent
-                : theme.colorScheme.secondaryContainer,
-            child: ListView(
-              children: [
-                GridView.count(
-                    shrinkWrap: true,
-                    crossAxisCount: actionButtons.length,
-                    children: actionButtons
-                )
-              ],
             ),
-          )
-      );
-      cards.add(
-          Card(
-            margin: EdgeInsets.only(top: 2.5, bottom: 1.25),
-            child: card,
-      ));
+            PopupMenuButton<int>(
+                onSelected: (item) => handleCardAction(item, service),
+                itemBuilder: (context) => [
+                      PopupMenuItem(value: 0, child: Text("Logs")),
+                      PopupMenuDivider(),
+                      PopupMenuItem(value: 1, child: Text("Start")),
+                      PopupMenuItem(value: 2, child: Text("Restart")),
+                      PopupMenuItem(
+                          value: 3,
+                          child: Text(
+                            "Stop",
+                            style: TextStyle(color: Colors.red),
+                          )),
+                    ])
+          ],
+        )
+      ]));
+      cards.add(card);
     });
 
     return cards;
+  }
+
+  Future<void> handleCardAction(int item, Service service) async {
+    switch (item) {
+      case 0:
+        Get.to(() => LogsPageStarter(service.name));
+        break;
+      case 1:
+        _doServiceAction(service.name, "START");
+        break;
+      case 2:
+        _doServiceAction(service.name, "RESTART");
+        break;
+      case 3:
+        _doServiceAction(service.name, "STOP");
+        break;
+    }
   }
 
   Future<List<Service>> _getServices() async {
@@ -232,7 +212,7 @@ class ServicesPage extends State<ServicesPageStarter> {
   Future<void> _refreshView() async {
     bool refreshView = await Settings().getBool("refreshView", true);
 
-    if(refreshView) {
+    if (refreshView) {
       print("Initialize view refresher");
       _timer = Timer.periodic(Duration(seconds: 5), (timer) {
         setState(() {
@@ -241,10 +221,10 @@ class ServicesPage extends State<ServicesPageStarter> {
       });
     } else {
       try {
-        if(_timer.isActive) {
+        if (_timer.isActive) {
           _timer.cancel();
         }
-      } catch(e) {
+      } catch (e) {
         print("View refresh timer is not initialized");
       }
     }

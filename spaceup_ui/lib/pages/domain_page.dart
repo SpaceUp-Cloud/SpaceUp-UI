@@ -10,6 +10,7 @@ import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/SUGradient.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DomainPageStarter extends StatefulWidget {
   DomainPageStarter() : super();
@@ -96,29 +97,37 @@ class DomainPage extends State<DomainPageStarter> {
     });
   }
 
-  List<FlipCard> createCards(List<Domain> domains) {
-    var cards = <FlipCard>[];
+  List<Card> createCards(List<Domain> domains) {
+    var cards = <Card>[];
     if (domains.isEmpty) return cards;
 
     domains.forEach((domain) {
-      var card = FlipCard(
-        direction: FlipDirection.VERTICAL,
-        front: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-          ListTile(
-            leading: Icon(Icons.cloud),
-            title: Text(domain.url),
-          ),
-        ]),
-        back: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            TextButton(
-              child: const Text('Delete'),
-              onPressed: () {
-                _deleteDomainDialog(domain);
-              },
-            ),
-            const SizedBox(width: 4),
+      var card = Card(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                    child: ListTile(
+                  leading: Icon(Icons.cloud),
+                  title: Text(domain.url),
+                )),
+                PopupMenuButton<int>(
+                  onSelected: (item) => handleCardAction(item, domain),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(value: 0, child: Text("Open")),
+                    PopupMenuItem(
+                        value: 1,
+                        child: Container(
+                          child: Text(
+                            "Delete",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ))
+                  ],
+                )
+              ],
+            )
           ],
         ),
       );
@@ -126,6 +135,24 @@ class DomainPage extends State<DomainPageStarter> {
     });
 
     return cards;
+  }
+
+  Future<void> handleCardAction(int item, Domain domain) async {
+    switch (item) {
+      case 0:
+        final urlToLaunch = "http://${domain.url}";
+        if (await canLaunch(urlToLaunch)) {
+          print("open $urlToLaunch");
+          await launch(urlToLaunch, forceWebView: true);
+        } else {
+          Util.showMessage(context, "Unable to open $urlToLaunch",
+              durationInSeconds: 5);
+        }
+        break;
+      case 1:
+        _deleteDomainDialog(domain);
+        break;
+    }
   }
 
   FutureBuilder<List<Domain>> createDomainCards() {
@@ -188,8 +215,7 @@ class DomainPage extends State<DomainPageStarter> {
           var dialog = AlertDialog(
             title: Text("Add your domains"),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0)
-            ),
+                borderRadius: BorderRadius.circular(10.0)),
             content: Container(
               width: MediaQuery.of(context).size.width * 2.5,
               child: Form(
@@ -202,10 +228,13 @@ class DomainPage extends State<DomainPageStarter> {
                       keyboardType: TextInputType.multiline,
                       maxLines: 5,
                       validator: (value) {
-                        return (value != null && value.isNotEmpty) ? value : "Please enter domains";
+                        return (value != null && value.isNotEmpty)
+                            ? value
+                            : "Please enter domains";
                       },
                       decoration: InputDecoration(
-                          hintText: "your.domain; foo.bar.de; blub.foo.bar; ..."),
+                          hintText:
+                              "your.domain; foo.bar.de; blub.foo.bar; ..."),
                     )
                   ],
                 ),
@@ -215,7 +244,7 @@ class DomainPage extends State<DomainPageStarter> {
               TextButton(
                   child: Text('Submit'),
                   onPressed: () {
-                    if(_textFieldController.value.text.isNotEmpty) {
+                    if (_textFieldController.value.text.isNotEmpty) {
                       _addDomain(_textFieldController.value.text);
                       Navigator.of(context).pop();
                     } else {
@@ -231,7 +260,10 @@ class DomainPage extends State<DomainPageStarter> {
             ],
           );
 
-          return Padding(padding: EdgeInsets.only(left: 50.0, right: 50.0), child: dialog,);
+          return Padding(
+            padding: EdgeInsets.only(left: 50.0, right: 50.0),
+            child: dialog,
+          );
         });
   }
 
@@ -307,7 +339,7 @@ class DomainPage extends State<DomainPageStarter> {
   Future<void> _refreshView() async {
     bool refreshView = await Settings().getBool("refreshView", true);
 
-    if(refreshView) {
+    if (refreshView) {
       print("Initialize view refresher");
       _timer = Timer.periodic(Duration(seconds: 30), (timer) {
         setState(() {
@@ -316,10 +348,10 @@ class DomainPage extends State<DomainPageStarter> {
       });
     } else {
       try {
-        if(_timer.isActive) {
+        if (_timer.isActive) {
           _timer.cancel();
         }
-      } catch(e) {
+      } catch (e) {
         print("View refresh timer is not initialized");
       }
     }
