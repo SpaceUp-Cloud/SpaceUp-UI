@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/SUGradient.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
@@ -67,6 +68,7 @@ class DomainPage extends State<DomainPageStarter> {
     final scaffold = Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
+        flexibleSpace: SUGradient.gradientContainer,
         title: Text("Domains"),
       ),
       floatingActionButton: AnimatedOpacity(

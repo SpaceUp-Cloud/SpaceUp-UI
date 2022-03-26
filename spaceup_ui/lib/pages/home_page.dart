@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/SUGradient.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
@@ -79,33 +80,29 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           backgroundColor: theme.primaryColor,
           title: Text(widget.title!),
+          flexibleSpace: SUGradient.gradientContainer,
         ),
         drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
               Container(
-                height: (util.isDesktop || util.isWeb) ? 60 : 100,
-                child: DrawerHeader(
-                    // TODO: Display SpaceUp Icon
-                    decoration: BoxDecoration(color: theme.primaryColor),
-                    child: Center(
-                        child: FutureBuilder(
-                          future: _getConnectedServer(),
-                          builder: (context, snapshot) {
-                            if(snapshot.hasData) {
-                              return Text(snapshot.data as String,
-                                style: TextStyle(
-                                  color: Colors.white
-                                ),);
-                            } else {
-                              return CircularProgressIndicator();
-                            }
-                          },
-                        )
-                    )
-                ),
-              ),
+                  height: (util.isDesktop || util.isWeb) ? 60 : 100,
+                  child: DrawerHeader(
+                      decoration: SUGradient.boxDecoration,
+                      child: FutureBuilder(
+                        future: _getConnectedServer(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(
+                              snapshot.data as String,
+                              style: TextStyle(color: Colors.white),
+                            );
+                          } else {
+                            return CircularProgressIndicator();
+                          }
+                        },
+                      ))),
               ListTile(
                 title: Text("Domains"),
                 onTap: () {

@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/SUGradient.dart';
 import 'package:spaceup_ui/pages/logs_page.dart';
 import 'package:spaceup_ui/style.dart';
 import 'package:spaceup_ui/ui_data.dart';
@@ -64,6 +65,7 @@ class ServicesPage extends State<ServicesPageStarter> {
     final scaffold = Scaffold(
       appBar: AppBar(
         backgroundColor: theme.primaryColor,
+        flexibleSpace: SUGradient.gradientContainer,
         title: Text("Services"),
       ),
       body: Stack(

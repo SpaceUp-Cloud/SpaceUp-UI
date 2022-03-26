@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:spaceup_ui/SUGradient.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 
@@ -26,6 +27,7 @@ class AboutPage extends State<AboutPageStarter> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         title: Text("About SpaceUp"),
+        flexibleSpace: SUGradient.gradientContainer,
       ),
       body: FutureBuilder(
         future: _getAboutText(),

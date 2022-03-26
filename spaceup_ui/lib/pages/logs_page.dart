@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
+import 'package:spaceup_ui/SUGradient.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
@@ -103,6 +104,7 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
     var scaffold = Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
+        flexibleSpace: SUGradient.gradientContainer,
         title: Text("${widget.servicename} Logs"),
       ),
       body: body,
