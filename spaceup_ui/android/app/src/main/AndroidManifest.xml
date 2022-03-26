@@ -4,7 +4,7 @@
 
     <application
         android:icon="@mipmap/launcher_icon"
-        android:label="SpaceUp Client"
+        android:label="SpaceUp"
         tools:targetApi="m">
         <activity
             android:name=".MainActivity"
