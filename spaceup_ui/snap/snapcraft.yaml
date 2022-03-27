@@ -7,11 +7,11 @@ confinement: devmode
 base: core18
 grade: stable
 
-slots:
-  dbus-spaceup-ui: # adjust accordingly to your app name
-    interface: dbus
-    bus: session
-    name: technology.iatlas.spaceup_ui # adjust accordingly to your app name and
+#slots:
+#  dbus-spaceup-ui: # adjust accordingly to your app name
+ #   interface: dbus
+ #   bus: session
+ #   name: technology.iatlas.spaceup_ui # adjust accordingly to your app name and
     
 apps:
   spaceup-ui:
@@ -19,8 +19,9 @@ apps:
     extensions: [flutter-master] # flutter-dev | flutter-master
     plugs:
     - network
-    slots:
-      - dbus-spaceup-ui
+#    slots:
+#      - dbus-spaceup-ui
+
 parts:
   spaceup-ui:
     source: .

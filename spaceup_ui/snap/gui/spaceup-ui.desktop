@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=SpaceUp
+Comment=SpaceUp makes your Uberspace easier!
+Exec=spaceup-ui
+Icon=${SNAP}/meta/gui/spaceup-ui.png
+Terminal=false
+Type=Application
+Categories=Utility;
