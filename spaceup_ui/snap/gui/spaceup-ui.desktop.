@@ -1,0 +1,8 @@
+  [Desktop Entry]
+  Name=SpaceUp
+  Comment=SpaceUp makes your Uberspace easier!
+  Exec=SpaceUp
+  Icon=${SNAP}/meta/gui/spaceup-ui.png # replace name to your app name
+  Terminal=false
+  Type=Application
+  Categories=Utility; #adjust accordingly your snap category

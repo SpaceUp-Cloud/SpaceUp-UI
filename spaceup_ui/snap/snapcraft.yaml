@@ -1,0 +1,29 @@
+name: spaceup-ui
+version: 0.23.0
+summary: SpaceUp Client to connect with your Uberspace!
+description: SpaceUp makes it easy to work with your Uberspace!
+
+confinement: devmode
+base: core18
+grade: stable
+
+slots:
+  dbus-spaceup-ui: # adjust accordingly to your app name
+    interface: dbus
+    bus: session
+    name: technology.iatlas.spaceup_ui # adjust accordingly to your app name and
+    
+apps:
+  spaceup-ui:
+    command: SpaceUp
+    extensions: [flutter-master] # flutter-dev | flutter-master
+    plugs:
+    - network
+    slots:
+      - dbus-spaceup-ui
+parts:
+  spaceup-ui:
+    source: .
+    plugin: flutter
+    flutter-target: lib/main.dart # The main entry-point file of the application
+
