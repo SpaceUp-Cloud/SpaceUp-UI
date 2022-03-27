@@ -3,6 +3,7 @@
 ## Modern UI with Flutter for Web, Android, Windows and Linux.
 
 For Linux you can find it here (right now as beta!)
+
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/spaceup-ui)
 
 Installation for Linux:
