@@ -143,7 +143,10 @@ class DomainPage extends State<DomainPageStarter> {
         final urlToLaunch = "http://${domain.url}";
         if (await canLaunch(urlToLaunch)) {
           print("open $urlToLaunch");
-          await launch(urlToLaunch, forceWebView: true);
+          Util.showMessage(context, "Going to open $urlToLaunch");
+          await Timer(Duration(seconds: 5), () {
+            launch(urlToLaunch, forceWebView: true);
+          });
         } else {
           Util.showMessage(context, "Unable to open $urlToLaunch",
               durationInSeconds: 5);
@@ -292,10 +295,14 @@ class DomainPage extends State<DomainPageStarter> {
 
     List<dynamic> domains = <dynamic>[];
     domain.split(";").forEach((element) {
-      var map = Map<String, String>();
-      map["url"] = element;
-      domains.add(map);
+      if(element.isNotEmpty) {
+        var map = Map<String, String>();
+        map["url"] = element;
+        domains.add(map);
+      }
     });
+
+    Util.showMessage(context, "Going to create $domains", durationInSeconds: 5);
 
     try {
       var url = await URL().baseUrl;
