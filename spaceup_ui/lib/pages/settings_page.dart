@@ -19,7 +19,7 @@ class SettingsPage extends State<SettingsPageStarter> {
   @override
   Widget build(BuildContext context) {
     final Util util = Util();
-    final isPartlyDesktop = (!util.isDesktop || Platform.isLinux);
+    final isPartlyDesktop = !util.isWeb && (!util.isDesktop || Platform.isLinux);
 
     final submenus = <Widget>[];
     submenus.add(SwitchSettingsTile(
@@ -83,7 +83,7 @@ class SettingsPage extends State<SettingsPageStarter> {
     }*/
 
     // Das not work yet on desktop (except Linux) but web
-    if (isPartlyDesktop || util.isWeb) {
+    if (isPartlyDesktop || util.isWeb || util.isMobile) {
       submenus.add(SettingsTileGroup(
         title: 'Behaviour',
         children: [
@@ -110,7 +110,10 @@ class SettingsPage extends State<SettingsPageStarter> {
       appBarBackgroundColor: Theme.of(context).primaryColor,
     );
 
-    return Scaffold(body: settingsList);
+    return AnimatedTheme(
+        duration: Duration(milliseconds: 300),
+        data: Theme.of(context),
+        child: Scaffold(body: settingsList));
   }
 
   Future<void> changeTheme(BuildContext context) async {
@@ -118,6 +121,7 @@ class SettingsPage extends State<SettingsPageStarter> {
     print("Change theme $themeMode");
 
     if (themeMode == 'system') {
+      //AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.system);
       AdaptiveTheme.of(context).setSystem();
     } else if (themeMode == 'dark') {
       AdaptiveTheme.of(context).setDark();
