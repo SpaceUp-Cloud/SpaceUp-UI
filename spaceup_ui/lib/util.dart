@@ -76,6 +76,7 @@ class Util {
 
   static Future<void> logout(BuildContext context) async {
     Settings().save("jwt", "");
+    Settings().save("manualLogout", true); // Shall prevent to login automatically
 
     bool rememberLogin = await Settings().getBool("rememberLogin", false);
     if(!rememberLogin) {

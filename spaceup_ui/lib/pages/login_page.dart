@@ -36,6 +36,7 @@ class _LoginState extends State<LoginPage> {
   final usernameText = TextEditingController();
   late bool rememberLogin = false;
   late bool autoLogin = false;
+  late bool manuallyLogout = false;
 
   // setup API key from server
   final apikey = TextEditingController();
@@ -529,7 +530,7 @@ class _LoginState extends State<LoginPage> {
             child: OutlinedButton(
                 style: flatButtonStyle,
                 child: Text('Login'),
-                onPressed: _login)),
+                onPressed: () => _login(viaForm: true))),
         Container(
           child: CheckboxListTile(
             title: Text('Remember Login?'),
@@ -583,7 +584,7 @@ class _LoginState extends State<LoginPage> {
     }
   }
 
-  Future<void> _login() async {
+  Future<void> _login({viaForm: false}) async {
     final httpClient = http.Client();
     final client = RetryClient(httpClient);
 
@@ -609,7 +610,10 @@ class _LoginState extends State<LoginPage> {
         Settings().save("password", password);
         Settings().save("rememberLogin", rememberLogin);
 
-        Util.login(context);
+        // Login in if user initiated or we haven't been log out manually
+        if(viaForm || manuallyLogout == false) {
+          Util.login(context);
+        }
       } else {
         final serverMsg = response.body.isNotEmpty
             ? jsonDecode(response.body)["_embedded"]["errors"][0]["message"]
@@ -723,12 +727,16 @@ class _LoginState extends State<LoginPage> {
   Future<void> getUserSettings() async {
     bool isRememberLogin = await Settings().getBool("rememberLogin", false);
     bool isAutoLogin = await Settings().getBool("autoLogin", false);
+    bool manualLogout = await Settings().getBool("manualLogout", false);
+
     print("Remember login: $isRememberLogin");
     print("Auto login: $isAutoLogin");
+    print("Manual logout: $manualLogout ");
 
     setState(() {
       rememberLogin = isRememberLogin;
       autoLogin = isAutoLogin;
+      manuallyLogout = manualLogout;
     });
 
     if (isRememberLogin) {
