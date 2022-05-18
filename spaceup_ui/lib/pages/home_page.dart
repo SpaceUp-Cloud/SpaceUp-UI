@@ -220,11 +220,13 @@ class _HomePageState extends State<HomePage> {
           if (snapshot.hasData && snapshot.data != null) {
             return createServerVersionCard(snapshot.data!);
           } else if (snapshot.hasError) {
-            Util.showMessage(context, "${snapshot.error}");
+            //Util.showMessage(context, "${snapshot.error}");
           }
 
-          return Center(
-            child: LinearProgressIndicator(),
+          return Card(
+            child: Center(
+                child: CircularProgressIndicator()
+            ),
           );
         });
   }
@@ -236,12 +238,14 @@ class _HomePageState extends State<HomePage> {
         builder: (context, AsyncSnapshot<String> snapshot) {
           if (snapshot.hasData && snapshot.data != null) {
             return createHostnameCard(snapshot.data!);
-          } else if (snapshot.hasError) {
-            Util.showMessage(context, "${snapshot.error}");
+          } else if (snapshot.hasError && snapshot.error != null) {
+            //Util.showMessage(context, "${snapshot.error!}");
           }
 
-          return Center(
-            child: LinearProgressIndicator(),
+          return Card(
+            child: Center(
+                child: CircularProgressIndicator()
+            ),
           );
         });
   }
@@ -254,12 +258,14 @@ class _HomePageState extends State<HomePage> {
         builder: (context, AsyncSnapshot<Disk> snapshot) {
           if (snapshot.hasData && snapshot.data != null) {
             return createDiskCard(snapshot.data!);
-          } else if (snapshot.hasError) {
-            Util.showMessage(context, "${snapshot.error}");
+          } else if (snapshot.hasError && snapshot.error != null) {
+            //Util.showMessage(context, "${snapshot.error!}");
           }
 
-          return Center(
-            child: LinearProgressIndicator(),
+          return Card(
+            child: Center(
+                child: CircularProgressIndicator()
+            ),
           );
         });
   }
