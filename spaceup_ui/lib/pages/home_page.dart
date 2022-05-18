@@ -136,7 +136,32 @@ class _HomePageState extends State<HomePage> {
               ListTile(
                 title: Text('Logout'),
                 onTap: () {
-                  Util.logout(context);
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        final dialog = AlertDialog(
+                          title: Text("Want to forget server?"),
+
+                          actions: [
+                            TextButton(
+                              child: Text("Yes"),
+                              onPressed: () {
+                                Util.forgetServer();
+                                Util.logout(context, manual: true);
+                              },
+                            ),
+                            TextButton(
+                                child: Text("Nope, keep it!"),
+                                onPressed: () {
+                                  Util.logout(context, manual: true);
+                                }
+                            )
+                          ],
+                        );
+
+                        return dialog;
+                      }
+                  );
                 },
               )
             ],
