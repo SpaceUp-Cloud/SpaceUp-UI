@@ -46,7 +46,7 @@ class ServicesPage extends State<ServicesPageStarter> {
     try {
       _timer.cancel();
     } catch (ex) {
-      print("Time was not initialized");
+      print("Timer was not initialized");
     }
   }
 
