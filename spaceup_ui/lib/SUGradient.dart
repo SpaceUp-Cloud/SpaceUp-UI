@@ -18,7 +18,7 @@ class SUGradient {
             colors: <Color>[
               Colors.blue,
               Colors.deepPurple,
-              Colors.white
+              Colors.teal
             ]
         )
     );
