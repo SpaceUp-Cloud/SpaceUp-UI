@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/SUGradient.dart';
-
 import 'package:spaceup_ui/util.dart';
 
 import '../ui_data.dart';
@@ -24,10 +23,10 @@ class _LoginState extends State<LoginPage> {
   final nextStep = ValueNotifier<int>(0);
 
   // validating forms
+  final _formValidateServerKey = GlobalKey<FormState>();
   final _formApiKey = GlobalKey<FormState>();
   final _formKeyUser = GlobalKey<FormState>();
   final _formKeySsh = GlobalKey<FormState>();
-  final _formKeyFinalize = GlobalKey<FormState>();
 
   final progressValue = ValueNotifier(0.0);
 
@@ -185,26 +184,45 @@ class _LoginState extends State<LoginPage> {
 
   Center _serverUrlForm() {
     return Center(
-      child: ListView(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10.0),
-            child: TextField(
-              controller: urlText,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Server Url',
-                  hintText: 'https://your.server'),
+      child: Form(
+        key: _formValidateServerKey,
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.0),
+              child: TextFormField(
+                validator: (text) {
+                  if(text == null || text.isEmpty) {
+                    return "You have to enter your SpaceUp server";
+                  } else {
+                    if(!text.startsWith("https://")) {
+                      return "Your URL needs to begin with https://";
+                    }
+
+                  }
+                  return null;
+                },
+                controller: urlText,
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Server Url',
+                    hintText: 'https://your.server'),
+              ),
             ),
-          ),
-          Container(
-              height: 50,
-              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: OutlinedButton(
-                  style: flatButtonStyle,
-                  child: Text('Validate'),
-                  onPressed: _validateUrl))
-        ],
+            Container(
+                height: 50,
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: OutlinedButton(
+                    style: flatButtonStyle,
+                    child: Text('Validate'),
+                    onPressed: () {
+                      if(_formValidateServerKey.currentState!.validate()) {
+                        _validateUrl();
+                      }
+                    })
+            )
+          ],
+        ),
       ),
     );
   }
@@ -557,17 +575,27 @@ class _LoginState extends State<LoginPage> {
       if (url.isNotEmpty) {
         var uri = Uri.tryParse('$url/api/system/installed');
         var response = await client.get(uri!);
-        print(response.body);
         try {
-          var parsed = json.decode(response.body).cast<String, dynamic>();
-          if (parsed["isInstalled"] == true) {
-            showProcess.value = 2;
+          if(response.statusCode == 200) {
+            var parsed = json.decode(response.body).cast<String, dynamic>();
+            if (parsed["isInstalled"] == true) {
+              showProcess.value = 2;
+            } else {
+              _setup();
+            }
+            Settings().save("server", url);
+            Util.showMessage(context, "Connected with $url",
+                durationInSeconds: 5);
           } else {
-            _setup();
+            if(response.isRedirect) {
+              Util.showMessage(context,
+                  "$url tries to redirect. Did you mean 'https'?",
+                durationInSeconds: 5
+              );
+            } else {
+              Util.showMessage(context, response.body, durationInSeconds: 5);
+            }
           }
-          Settings().save("server", url);
-          Util.showMessage(context, "Connected with $url",
-              durationInSeconds: 5);
         } catch (ex) {
           Util.showMessage(context, "Unable to validate installation for $url.",
               durationInSeconds: 5);

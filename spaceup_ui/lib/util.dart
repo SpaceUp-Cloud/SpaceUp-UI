@@ -61,7 +61,6 @@ class Util {
 
   Future<Map<String, String>> getJWT(BuildContext context, {bool autologin = true}) async {
     if(autologin) {
-      print("Autologin");
       checkJWT(context);
     }
 
@@ -74,9 +73,9 @@ class Util {
     return headers;
   }
 
-  static Future<void> logout(BuildContext context) async {
+  static Future<void> logout(BuildContext context, {bool manual = false}) async {
     Settings().save("jwt", "");
-    Settings().save("manualLogout", true); // Shall prevent to login automatically
+    Settings().save("manualLogout", manual); // Shall prevent to login automatically
 
     bool rememberLogin = await Settings().getBool("rememberLogin", false);
     if(!rememberLogin) {
@@ -86,6 +85,10 @@ class Util {
     }
 
     Get.offAll(() => LoginPage());
+  }
+
+  static Future<void> forgetServer() async {
+    await Settings().save("server", "");
   }
 
   static Future<void> login(BuildContext context) async {
