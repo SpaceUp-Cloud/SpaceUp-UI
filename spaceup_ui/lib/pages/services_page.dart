@@ -32,7 +32,7 @@ class ServicesPage extends State<ServicesPageStarter> {
   @override
   void initState() {
     super.initState();
-    Util.checkJWT(context);
+    Util.checkJWT();
     services = _getServices();
 
     _refreshView();
@@ -173,7 +173,7 @@ class ServicesPage extends State<ServicesPageStarter> {
 
     try {
       var url = await URL().baseUrl;
-      var jwt = await Util().getJWT(context);
+      var jwt = await Util().getJWT();
       var response =
           await client.get(Uri.tryParse('$url/service/list')!, headers: jwt);
       print(response.body);
@@ -191,7 +191,7 @@ class ServicesPage extends State<ServicesPageStarter> {
 
     try {
       var url = await URL().baseUrl;
-      var jwt = await Util().getJWT(context);
+      var jwt = await Util().getJWT();
       var uri = Uri.tryParse('$url/service/execute/$servicename/$action');
       var response = await client.post(uri!, headers: jwt);
       print(response.body);

@@ -5,6 +5,7 @@ class UIData {
   static const String domainsRoute = "/domains";
   static const String settingsRoute = "/settings";
   static const String servicesRoute = "/services";
+  static const String webbackendsRoute = "/webbackends";
   static const String homeRoute = "/home";
   static const String aboutRoute = "/about";
   static const String loginRoute = "/";

@@ -11,6 +11,8 @@ import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../services/domainService.dart';
+
 class DomainPageStarter extends StatefulWidget {
   DomainPageStarter() : super();
 
@@ -30,8 +32,8 @@ class DomainPage extends State<DomainPageStarter> {
   @override
   void initState() {
     super.initState();
-    Util.checkJWT(context);
-    domains = _getDomains(true);
+    Util.checkJWT();
+    domains = DomainService.getDomains(true);
 
     scrollController.addListener(() {
       setState(() {
@@ -92,7 +94,7 @@ class DomainPage extends State<DomainPageStarter> {
 
   Future<void> _refreshDomains() async {
     setState(() {
-      domains = _getDomains(false);
+      domains = DomainService.getDomains(false);
     });
   }
 
@@ -194,7 +196,9 @@ class DomainPage extends State<DomainPageStarter> {
               TextButton(
                   child: Text('Confirm'),
                   onPressed: () {
-                    _deleteDomain(domain);
+                    DomainService.deleteDomain(context, domain).then((value) => {
+                      this.domains = DomainService.getDomains(false)
+                    });
                     Navigator.of(context).pop();
                   }),
               TextButton(
@@ -269,24 +273,7 @@ class DomainPage extends State<DomainPageStarter> {
         });
   }
 
-  Future<void> _deleteDomain(Domain domain) async {
-    final httpClient = http.Client();
-    final client = RetryClient(httpClient);
 
-    try {
-      var url = await URL().baseUrl;
-      var uri = Uri.tryParse('$url/domain/delete/${domain.url}');
-      var jwt = await Util().getJWT(context);
-      var response = await client.delete(uri!, headers: jwt);
-
-      if (response.body.isNotEmpty && response.statusCode == 200) {
-        Util.showFeedback(context, response.body);
-        _refreshDomains();
-      }
-    } finally {
-      client.close();
-    }
-  }
 
   Future<void> _addDomain(String domain) async {
     final httpClient = http.Client();
@@ -305,7 +292,7 @@ class DomainPage extends State<DomainPageStarter> {
 
     try {
       var url = await URL().baseUrl;
-      var jwt = await Util().getJWT(context);
+      var jwt = await Util().getJWT();
       var addDomainUrl = Uri.tryParse('$url/domain/add');
       var response = await client.post(addDomainUrl!,
           headers: jwt, body: json.encode(domains));
@@ -319,28 +306,7 @@ class DomainPage extends State<DomainPageStarter> {
     }
   }
 
-  Future<List<Domain>> _getDomains(bool useCached) async {
-    var domains = <Domain>[];
-    final httpClient = http.Client();
-    final client = RetryClient(httpClient);
-    var isCached =
-        await Settings().getBool("isCachedDomain", false) && useCached;
 
-    try {
-      var url = await URL().baseUrl;
-      var jwt = await Util().getJWT(context);
-      var getDomainsUrl = "$url/domain/list?cached=$isCached";
-      var response =
-          await client.get(Uri.tryParse(getDomainsUrl)!, headers: jwt);
-      print(response.body);
-      if (response.statusCode == 200) {
-        domains = _parseDomains(response.body);
-      }
-    } finally {
-      client.close();
-    }
-    return domains;
-  }
 
   Future<void> _refreshView() async {
     bool refreshView = await Settings().getBool("refreshView", true);
@@ -349,7 +315,7 @@ class DomainPage extends State<DomainPageStarter> {
       print("Initialize view refresher");
       _timer = Timer.periodic(Duration(seconds: 30), (timer) {
         setState(() {
-          domains = _getDomains(false);
+          domains = DomainService.getDomains(false);
         });
       });
     } else {
@@ -363,20 +329,6 @@ class DomainPage extends State<DomainPageStarter> {
     }
   }
 
-  List<Domain> _parseDomains(String body) {
-    final parsed = json.decode(body).cast<Map<String, dynamic>>();
-    return parsed.map<Domain>((json) => Domain.fromJson(json)).toList();
-  }
+
 }
 
-class Domain {
-  String url;
-
-  Domain({required this.url});
-
-  factory Domain.fromJson(Map<String, dynamic> json) => _domainFromJson(json);
-}
-
-Domain _domainFromJson(Map<String, dynamic> json) {
-  return Domain(url: json["url"] as String);
-}

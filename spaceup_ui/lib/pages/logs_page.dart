@@ -203,7 +203,7 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
     final client = RetryClient(http.Client());
     try {
       final url = await URL().baseUrl;
-      final jwt = await Util().getJWT(context);
+      final jwt = await Util().getJWT();
       final logsUri = Uri.tryParse(
           '$url/service/logs/$servicename?limit=$limit&reversed=$reversed&type=$type');
       print(logsUri);

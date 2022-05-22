@@ -59,9 +59,9 @@ class Util {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Future<Map<String, String>> getJWT(BuildContext context, {bool autologin = true}) async {
+  Future<Map<String, String>> getJWT({bool autologin = true}) async {
     if(autologin) {
-      checkJWT(context);
+      checkJWT();
     }
 
     String jwt = (await Settings().getString("jwt", ""))!;
@@ -73,7 +73,7 @@ class Util {
     return headers;
   }
 
-  static Future<void> logout(BuildContext context, {bool manual = false}) async {
+  static Future<void> logout({bool manual = false}) async {
     Settings().save("jwt", "");
     Settings().save("manualLogout", manual); // Shall prevent to login automatically
 
@@ -91,22 +91,22 @@ class Util {
     await Settings().save("server", "");
   }
 
-  static Future<void> login(BuildContext context) async {
+  static Future<void> login() async {
     Get.offAll(() => HomePage("Home"));
   }
 
-  static Future<void> checkJWT(BuildContext context) async {
+  static Future<void> checkJWT() async {
     final jwt = (await Settings().getString("jwt", ""))!;
     try {
       if(!JwtDecoder.isExpired(jwt)) {
         // When are on the login page, we want to login
         var currentRoute = Get.currentRoute;
         if(currentRoute == UIData.loginRoute || currentRoute == "/") {
-          Util.login(context);
+          Util.login();
         }
       } else {
         print("JWT is expired!");
-        Util.logout(context);
+        Util.logout();
       }
     } catch(fe) {
       print("Token is invalid");

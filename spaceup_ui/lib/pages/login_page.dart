@@ -640,7 +640,7 @@ class _LoginState extends State<LoginPage> {
 
         // Login in if user initiated or we haven't been log out manually
         if(viaForm || manuallyLogout == false) {
-          Util.login(context);
+          Util.login();
         }
       } else {
         final serverMsg = response.body.isNotEmpty

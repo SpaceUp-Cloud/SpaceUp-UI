@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Util.checkJWT(context);
+    Util.checkJWT();
 
     setState(() {
       hostname = _getHostname();
@@ -115,6 +115,12 @@ class _HomePageState extends State<HomePage> {
                   Get.toNamed(UIData.servicesRoute);
                 },
               ),
+              ListTile(
+                title: Text("Webbackends"),
+                onTap: () {
+                  Get.toNamed(UIData.webbackendsRoute);
+                },
+              ),
               Divider(
                 height: 1.0,
               ),
@@ -147,13 +153,13 @@ class _HomePageState extends State<HomePage> {
                               child: Text("Yes"),
                               onPressed: () {
                                 Util.forgetServer();
-                                Util.logout(context, manual: true);
+                                Util.logout(manual: true);
                               },
                             ),
                             TextButton(
                                 child: Text("Nope, keep it!"),
                                 onPressed: () {
-                                  Util.logout(context, manual: true);
+                                  Util.logout(manual: true);
                                 }
                             )
                           ],
@@ -308,7 +314,7 @@ class _HomePageState extends State<HomePage> {
     final client = RetryClient(http.Client());
     try {
       final url = await URL().baseUrl;
-      final jwt = await Util().getJWT(context);
+      final jwt = await Util().getJWT();
       var response =
           await client.get(Uri.tryParse('$url/system/version')!, headers: jwt);
       if (response.body.isNotEmpty && response.statusCode == 200) {
@@ -327,7 +333,7 @@ class _HomePageState extends State<HomePage> {
     final client = RetryClient(http.Client());
     try {
       final url = await URL().baseUrl;
-      final jwt = await Util().getJWT(context);
+      final jwt = await Util().getJWT();
       var response =
           await client.get(Uri.tryParse('$url/system/hostname')!, headers: jwt);
       print(response.body);
@@ -347,7 +353,7 @@ class _HomePageState extends State<HomePage> {
     final client = RetryClient(http.Client());
     try {
       final url = await URL().baseUrl;
-      final jwt = await Util().getJWT(context);
+      final jwt = await Util().getJWT();
 
       var response =
           await client.get(Uri.tryParse('$url/system/disk')!, headers: jwt);

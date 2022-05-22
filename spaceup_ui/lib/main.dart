@@ -8,6 +8,7 @@ import 'package:spaceup_ui/pages/home_page.dart';
 import 'package:spaceup_ui/pages/login_page.dart';
 import 'package:spaceup_ui/pages/services_page.dart';
 import 'package:spaceup_ui/pages/settings_page.dart';
+import 'package:spaceup_ui/pages/webbackends_page.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 import 'package:window_size/window_size.dart';
@@ -61,6 +62,12 @@ class MyApp extends StatelessWidget {
                   {
                     return PageTransition(
                         child: ServicesPageStarter(),
+                        type: PageTransitionType.leftToRight);
+                  }
+                case '/webbackends':
+                  {
+                    return PageTransition(
+                        child: WebbackendsPageStarter(),
                         type: PageTransitionType.leftToRight);
                   }
                 case '/settings':
