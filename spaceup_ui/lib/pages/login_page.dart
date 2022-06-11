@@ -195,7 +195,8 @@ class _LoginState extends State<LoginPage> {
                   if(text == null || text.isEmpty) {
                     return "You have to enter your SpaceUp server";
                   } else {
-                    if(!text.startsWith("https://") && !text.startsWith("http://")) {
+                    final urlPattern = RegExp("https?://");
+                    if(!text.startsWith(urlPattern)) {
                       return "Your URL needs to begin with https:// or http://";
                     }
 
