@@ -182,48 +182,47 @@ class _LoginState extends State<LoginPage> {
     showProcess.value = 1;
   }
 
-  Center _serverUrlForm() {
-    return Center(
-      child: Form(
-        key: _formValidateServerKey,
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.0),
-              child: TextFormField(
-                validator: (text) {
-                  if(text == null || text.isEmpty) {
-                    return "You have to enter your SpaceUp server";
-                  } else {
-                    final urlPattern = RegExp("https?://");
-                    if(!text.startsWith(urlPattern)) {
-                      return "Your URL needs to begin with https:// or http://";
-                    }
-
+  Widget _serverUrlForm() {
+    return Form(
+      key: _formValidateServerKey,
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.0),
+            child: TextFormField(
+              validator: (text) {
+                if(text == null || text.isEmpty) {
+                  return "You have to enter your SpaceUp server";
+                } else {
+                  final urlPattern = RegExp("https?://");
+                  if(!text.startsWith(urlPattern)) {
+                    return "Your URL needs to begin with https:// or http://";
                   }
-                  return null;
-                },
-                controller: urlText,
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Server Url',
-                    hintText: 'https://your.server'),
-              ),
+
+                }
+                return null;
+              },
+              controller: urlText,
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Server Url',
+                  hintText: 'https://your.server'),
             ),
-            Container(
-                height: 50,
-                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: OutlinedButton(
-                    style: flatButtonStyle,
-                    child: Text('Validate'),
-                    onPressed: () {
-                      if(_formValidateServerKey.currentState!.validate()) {
-                        _validateUrl();
-                      }
-                    })
-            )
-          ],
-        ),
+          ),
+          Container(
+              height: 50,
+              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+              child: OutlinedButton(
+                  style: flatButtonStyle,
+                  child: Text('Validate'),
+                  onPressed: () {
+                    if(_formValidateServerKey.currentState!.validate()) {
+                      _validateUrl();
+                    }
+                  })
+          )
+        ],
       ),
     );
   }
