@@ -288,7 +288,7 @@ class _HomePageState extends State<HomePage> {
           child: ListView(
             children: [
               Center(
-                child: Text("Used disk usage"),
+                child: Text("Used disk space"),
               ),
               Center(
                 child: Text("${disk.space}"),
