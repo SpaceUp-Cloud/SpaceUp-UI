@@ -279,7 +279,7 @@ class _HomePageState extends State<HomePage> {
   Widget createDiskCard(Disk disk) {
     return GridView(
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        childAspectRatio: 3,
+        childAspectRatio: 2.5,
         maxCrossAxisExtent: 250,
       ),
       shrinkWrap: true,
@@ -290,6 +290,7 @@ class _HomePageState extends State<HomePage> {
               Center(
                 child: Text("Used disk space"),
               ),
+              Divider(),
               Center(
                 child: Text("${disk.space}"),
               ),
@@ -305,6 +306,7 @@ class _HomePageState extends State<HomePage> {
               Center(
                 child: Text("Available disk space"),
               ),
+              Divider(),
               Center(
                 child: Text("${disk.quota}"),
               ),
