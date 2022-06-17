@@ -276,35 +276,45 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  Card createDiskCard(Disk disk) {
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(5.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Text("Used:"),
-                Card(
-                  child: Text("${disk.space} / ${disk.spacePercentage}%"),
-                  margin: EdgeInsets.all(5.0),
-                  //color: theme.buttonColor,
-                )
-              ],
-            ),
-            Row(
-              children: [
-                Text("Available:"),
-                Card(
-                  child: Text("${disk.quota} / ${disk.availableQuota}%"),
-                  margin: EdgeInsets.all(5.0),
-                  //color: theme.buttonColor,
-                )
-              ],
-            )
-          ],
-        ),
+  Widget createDiskCard(Disk disk) {
+    return GridView(
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        childAspectRatio: 3,
+        maxCrossAxisExtent: 250,
       ),
+      shrinkWrap: true,
+      children: [
+        Card(
+          child: ListView(
+            children: [
+              Center(
+                child: Text("Used disk usage"),
+              ),
+              Center(
+                child: Text("${disk.space}"),
+              ),
+              Center(
+                child: Text("${disk.spacePercentage}%"),
+              ),
+            ],
+          ),
+        ),
+        Card(
+          child: ListView(
+            children: [
+              Center(
+                child: Text("Available disk space"),
+              ),
+              Center(
+                child: Text("${disk.quota}"),
+              ),
+              Center(
+                child: Text("${disk.availableQuota}%"),
+              )
+            ],
+          ),
+        )
+      ],
     );
   }
 
