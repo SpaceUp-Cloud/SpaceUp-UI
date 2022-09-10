@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
+import 'package:spaceup_ui/util.dart';
 
 class UIData {
   static const String domainsRoute = "/domains";
@@ -30,7 +31,7 @@ class ThemeConfig {
 
   static ThemeData get lightMode {
     return ThemeData(
-        //useMaterial3: true,
+        useMaterial3: Util().isMobile ? true: false,
         brightness: Brightness.light,
         colorSchemeSeed: Colors.teal,
     );
@@ -38,7 +39,7 @@ class ThemeConfig {
 
   static ThemeData get darkMode {
     return ThemeData(
-      //useMaterial3: true,
+      useMaterial3: Util().isMobile ? true: false,
       brightness: Brightness.dark,
       colorSchemeSeed: Colors.teal.shade700,
     );
