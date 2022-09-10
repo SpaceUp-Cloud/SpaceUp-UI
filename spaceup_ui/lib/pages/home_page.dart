@@ -9,6 +9,7 @@ import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/SUGradient.dart';
 import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class HomePage extends StatefulWidget {
   HomePage(this.title) : super();
@@ -177,15 +178,9 @@ class _HomePageState extends State<HomePage> {
           children: [
             getServerVersionBuilder(),
             getHostnameBuilder(),
-            RefreshIndicator(
-              child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                controller: scrollController,
-                child: getDiskBuilder(),
-              ),
-              onRefresh: _getDisk,
-              key: refreshKeyDisk,
-            ),
+            Flexible(
+                child: getDiskBuilder()
+            )
           ],
         ));
   }
@@ -277,45 +272,40 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget createDiskCard(Disk disk) {
-    return GridView(
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        childAspectRatio: 2.5,
-        maxCrossAxisExtent: 250,
-      ),
-      shrinkWrap: true,
-      children: [
-        Card(
-          child: ListView(
-            children: [
-              Center(
-                child: Text("Used disk space"),
-              ),
-              Divider(),
-              Center(
-                child: Text("${disk.space}"),
-              ),
-              Center(
-                child: Text("${disk.spacePercentage}%"),
-              ),
-            ],
-          ),
-        ),
-        Card(
-          child: ListView(
-            children: [
-              Center(
-                child: Text("Available disk space"),
-              ),
-              Divider(),
-              Center(
-                child: Text("${disk.quota}"),
-              ),
-              Center(
-                child: Text("${disk.availableQuota}%"),
-              )
-            ],
-          ),
-        )
+    var max = 1.0;
+    var spaceLeft = 0.0;
+
+    try {
+      max = double.parse(disk.quota.split("M")[0]);
+      spaceLeft = double.parse(disk.space.split("M")[0]);
+    } catch(ex) {
+      // NOP
+    }
+
+    return SfRadialGauge(
+      /*title: GaugeTitle(
+        alignment: GaugeAlignment.center,
+        text: 'Disk Usage',
+          textStyle: TextStyle(fontSize: 20.0)
+      ),*/
+      enableLoadingAnimation: true,
+      axes: <RadialAxis>[
+        RadialAxis(minimum: 0, maximum: max, ranges: <GaugeRange>[
+          GaugeRange(startValue: 0, endValue: max, color: Colors.teal),
+          GaugeRange(startValue: 0, endValue: spaceLeft, color: Colors.deepOrangeAccent,)
+        ],
+        pointers: [
+          NeedlePointer(value: spaceLeft)
+        ],
+        annotations: <GaugeAnnotation>[
+          GaugeAnnotation(
+            angle: 90,
+            positionFactor: 1.0,
+            widget: Container(
+              child: Text("${disk.availableQuota}% / ${disk.space} of ${disk.quota}"),
+            )
+          )
+        ]),
       ],
     );
   }
