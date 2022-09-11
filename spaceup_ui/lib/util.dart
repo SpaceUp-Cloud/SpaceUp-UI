@@ -7,7 +7,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/pages/home_page.dart';
 import 'package:spaceup_ui/pages/login_page.dart';
-import 'package:spaceup_ui/ui_data.dart';
+import 'package:spaceup_ui/services/authenticationService.dart';
 import 'package:universal_io/io.dart';
 
 class Util {
@@ -98,15 +98,20 @@ class Util {
   static Future<void> checkJWT() async {
     final jwt = (await Settings().getString("jwt", ""))!;
     try {
-      if(!JwtDecoder.isExpired(jwt)) {
-        // When are on the login page, we want to login
-        var currentRoute = Get.currentRoute;
-        if(currentRoute == UIData.loginRoute || currentRoute == "/") {
-          Util.login();
-        }
-      } else {
+      if(JwtDecoder.isExpired(jwt)) {
         print("JWT is expired!");
-        Util.logout();
+        final remember = await Settings().getBool("rememberLogin", false);
+        if(remember) {
+          final username = await Settings().getString("username", "");
+          final password = await Settings().getString("password", "");
+          print("Renew JWT.");
+          AuthenticationService.login(
+              username: username,
+              password: password
+          );
+        } else {
+          Util.logout();
+        }
       }
     } catch(fe) {
       print("Token is invalid");

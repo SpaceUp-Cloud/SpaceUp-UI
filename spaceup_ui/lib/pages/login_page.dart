@@ -5,9 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/SUGradient.dart';
+import 'package:spaceup_ui/services/authenticationService.dart';
 import 'package:spaceup_ui/util.dart';
-
-import '../ui_data.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage() : super();
@@ -109,7 +108,15 @@ class _LoginState extends State<LoginPage> {
                 usernameText.value.text.isNotEmpty &&
                 passwordText.value.text.isNotEmpty) {
                   titleText.value = "Login",
-                  if(autoLogin) _login()
+                  if(autoLogin && !manuallyLogout) {
+                    AuthenticationService.login(
+                        context: context,
+                        username: usernameText.value.text,
+                        password: passwordText.value.text,
+                        remember: rememberLogin,
+                        viaForm: true
+                    )
+                  }
             }
             else if (showProcess == 1)
               {
@@ -548,7 +555,17 @@ class _LoginState extends State<LoginPage> {
             child: OutlinedButton(
                 style: flatButtonStyle,
                 child: Text('Login'),
-                onPressed: () => _login(viaForm: true))),
+                onPressed: () {
+                  AuthenticationService.login(
+                      context: context,
+                      username: usernameText.value.text,
+                      password: passwordText.value.text,
+                      remember: rememberLogin,
+                      manuallyLogout: manuallyLogout,
+                      viaForm: true
+                  );
+                }
+            )),
         Container(
           child: CheckboxListTile(
             title: Text('Remember Login?'),
@@ -607,50 +624,6 @@ class _LoginState extends State<LoginPage> {
       showProcess.value = 0;
       Util.showMessage(context, "Cannot connect to $url", durationInSeconds: 5);
       Error();
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<void> _login({viaForm: false}) async {
-    final httpClient = http.Client();
-    final client = RetryClient(httpClient);
-
-    final username = usernameText.value.text;
-    final password = passwordText.value.text;
-
-    final body = jsonEncode({'username': username, 'password': password});
-    try {
-      var url = await URL().serverUrl;
-      var uri = Uri.tryParse('$url/login');
-      var response = await client.post(uri!,
-          headers: {"Content-Type": "application/json"}, body: body);
-
-      print("Login status code: ${response.statusCode}");
-      print(response.body);
-      if (response.body.isNotEmpty && response.statusCode == 200) {
-        print("Login was successful! ${response.body}");
-
-        Settings()
-            .save("jwt", JWT.fromJson(jsonDecode(response.body)).access_token);
-
-        Settings().save("username", username);
-        Settings().save("password", password);
-        Settings().save("rememberLogin", rememberLogin);
-
-        // Login in if user initiated or we haven't been log out manually
-        if(viaForm || manuallyLogout == false) {
-          Util.login();
-        }
-      } else {
-        final serverMsg = response.body.isNotEmpty
-            ? jsonDecode(response.body)["_embedded"]["errors"][0]["message"]
-            : "Code: ${response.statusCode}";
-        String msg = response.statusCode == 401
-            ? "Wrong credentials"
-            : serverMsg;
-        Util.showMessage(context, "Error: $msg", durationInSeconds: 10);
-      }
     } finally {
       client.close();
     }
