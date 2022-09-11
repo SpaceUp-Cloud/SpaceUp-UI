@@ -178,9 +178,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             getServerVersionBuilder(),
             getHostnameBuilder(),
-            Flexible(
-                child: getDiskBuilder()
-            )
+            getDiskBuilder()
           ],
         ));
   }
@@ -272,6 +270,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget createDiskCard(Disk disk) {
+    final primaryColor = Theme.of(context).textTheme.bodyText1?.color;
     var max = 1.0;
     var spaceLeft = 0.0;
 
@@ -282,20 +281,31 @@ class _HomePageState extends State<HomePage> {
       // NOP
     }
 
-    return SfRadialGauge(
-      /*title: GaugeTitle(
+    final gauge = SfRadialGauge(
+      title: GaugeTitle(
         alignment: GaugeAlignment.center,
         text: 'Disk Usage',
           textStyle: TextStyle(fontSize: 20.0)
-      ),*/
+      ),
       enableLoadingAnimation: true,
       axes: <RadialAxis>[
-        RadialAxis(minimum: 0, maximum: max, ranges: <GaugeRange>[
+        RadialAxis(
+            axisLabelStyle: GaugeTextStyle(color: primaryColor),
+            axisLineStyle: AxisLineStyle(color: primaryColor),
+            majorTickStyle: MajorTickStyle(color: primaryColor),
+            minimum: 0,
+            maximum: max,
+            ranges: <GaugeRange>[
           GaugeRange(startValue: 0, endValue: max, color: Colors.teal),
           GaugeRange(startValue: 0, endValue: spaceLeft, color: Colors.deepOrangeAccent,)
         ],
         pointers: [
-          NeedlePointer(value: spaceLeft)
+          NeedlePointer(
+            value: spaceLeft,
+            needleColor: primaryColor,
+            knobStyle: KnobStyle(color: primaryColor),
+            tailStyle: TailStyle(color: primaryColor),
+          )
         ],
         annotations: <GaugeAnnotation>[
           GaugeAnnotation(
@@ -307,6 +317,10 @@ class _HomePageState extends State<HomePage> {
           )
         ]),
       ],
+    );
+
+    return Card(
+      child: gauge,
     );
   }
 
@@ -379,7 +393,7 @@ class _HomePageState extends State<HomePage> {
 
     if (refreshView) {
       print("Initialize view refresher");
-      _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+      _timer = Timer.periodic(Duration(seconds: 5), (timer) {
         setState(() {
           disk = _getDisk();
           serverVersion = _getServerVersion();
