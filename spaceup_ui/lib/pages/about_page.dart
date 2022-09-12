@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/SUGradient.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 
 
 class AboutPageStarter extends StatefulWidget {
@@ -23,9 +23,14 @@ class AboutPage extends State<AboutPageStarter> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     final scaffold = Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: theme.primaryColor,
+        titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20.0
+        ),
         title: Text("About SpaceUp"),
         flexibleSpace: SUGradient.gradientContainer,
       ),
@@ -41,7 +46,13 @@ class AboutPage extends State<AboutPageStarter> {
                 <md.InlineSyntax>[md.EmojiSyntax()],
               ),
               onTapLink: (String txt, String? href, String title) async => {
-                if(await canLaunch(href!)) { await launch(href) }
+                if(await canLaunchUrl(Uri.parse(href!))) {
+                  await launchUrl(
+                      Uri.parse(href),
+                      mode: LaunchMode.inAppWebView,
+                      webViewConfiguration: WebViewConfiguration()
+                  )
+                }
               },
             );
           } else {

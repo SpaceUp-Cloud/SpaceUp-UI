@@ -137,7 +137,11 @@ class _LoginState extends State<LoginPage> {
 
     final scaffold = Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: theme.primaryColor,
+        titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20.0
+        ),
         flexibleSpace: SUGradient.gradientContainer,
         title: AnimatedBuilder(
           animation: titleText,

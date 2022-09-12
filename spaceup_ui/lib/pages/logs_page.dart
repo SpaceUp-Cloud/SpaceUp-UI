@@ -101,9 +101,14 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
       }, body: _getLogsBuilder(),
     );
 
+    ThemeData theme = Theme.of(context);
     var scaffold = Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: theme.primaryColor,
+        titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20.0
+        ),
         flexibleSpace: SUGradient.gradientContainer,
         title: Text("${widget.servicename} Logs"),
       ),
@@ -189,12 +194,6 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
   void _scrollToTop() {
     scrollController.animateTo(0,
         duration: Duration(seconds: 1), curve: Curves.fastLinearToSlowEaseIn);
-  }
-
-  Future<void> _onRefresh() async {
-    setState(() {
-      logs = _getLogs(widget.servicename);
-    });
   }
 
   Future<Logs> _getLogs(String servicename) async {

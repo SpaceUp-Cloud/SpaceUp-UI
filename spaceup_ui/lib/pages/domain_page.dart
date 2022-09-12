@@ -67,9 +67,14 @@ class DomainPage extends State<DomainPageStarter> {
       ),
     );
 
+    ThemeData theme = Theme.of(context);
     final scaffold = Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: theme.primaryColor,
+        titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20.0
+        ),
         flexibleSpace: SUGradient.gradientContainer,
         title: Text("Domains"),
       ),
@@ -142,12 +147,12 @@ class DomainPage extends State<DomainPageStarter> {
     switch (item) {
       case 0:
         final urlToLaunch = "http://${domain.url}";
-        if (await canLaunch(urlToLaunch)) {
-          print("open $urlToLaunch");
-          Util.showMessage(context, "Going to open $urlToLaunch");
-          await Timer(Duration(seconds: 5), () {
-            launch(urlToLaunch, forceWebView: true);
-          });
+        if(await canLaunchUrl(Uri.parse(urlToLaunch))) {
+          await launchUrl(
+              Uri.parse(urlToLaunch),
+              mode: LaunchMode.inAppWebView,
+              webViewConfiguration: WebViewConfiguration()
+          );
         } else {
           Util.showMessage(context, "Unable to open $urlToLaunch",
               durationInSeconds: 5);

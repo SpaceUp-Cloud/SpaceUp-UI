@@ -80,6 +80,10 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: theme.primaryColor,
+          titleTextStyle: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0
+          ),
           title: Text(widget.title!),
           flexibleSpace: SUGradient.gradientContainer,
         ),

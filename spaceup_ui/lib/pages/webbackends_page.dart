@@ -109,9 +109,14 @@ class WebbackendPage extends State<WebbackendsPageStarter> {
       ),
     );
 
+    ThemeData theme = Theme.of(context);
     final scaffold = Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: theme.primaryColor,
+        titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20.0
+        ),
         flexibleSpace: SUGradient.gradientContainer,
         title: Text("Web backends"),
       ),

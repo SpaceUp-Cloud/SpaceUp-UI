@@ -62,6 +62,10 @@ class ServicesPage extends State<ServicesPageStarter> {
     final scaffold = Scaffold(
       appBar: AppBar(
         backgroundColor: theme.primaryColor,
+        titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20.0
+        ),
         flexibleSpace: SUGradient.gradientContainer,
         title: Text("Services"),
       ),
