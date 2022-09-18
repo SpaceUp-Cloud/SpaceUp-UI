@@ -5,7 +5,7 @@
     <application
         android:icon="@mipmap/launcher_icon"
         android:label="SpaceUp"
-        tools:targetApi="m">
+        tools:targetApi="sv2">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -1,4 +1,6 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:spaceup_ui/util.dart';
 
@@ -29,19 +31,59 @@ class URL {
 
 class ThemeConfig {
 
-  static ThemeData get lightMode {
-    return ThemeData(
-        useMaterial3: Util().isMobile ? true: false,
+  Future<CorePalette?> getCoreColors() async {
+    final palette = await DynamicColorPlugin.getCorePalette();
+    return palette;
+  }
+
+  /*ThemeData lightMode(BuildContext context) {
+    var lightTheme = ThemeData(
+      useMaterial3: false,
+      brightness: Brightness.light,
+      colorSchemeSeed: Colors.teal,
+    ); // Default
+
+    DynamicColorBuilder(builder: (lightColor, darkColor) {
+      if(lightColor != null) {
+        lightTheme = ThemeData(
+          colorScheme: lightColor,
+          useMaterial3: true
+        );
+      }
+    });
+
+
+
+    /*
+    if(Util().isMobile) {
+      this.getCoreColors().then((value) => {
+        themeData = ThemeData(
+            colorScheme: value
+        ).copyWith(useMaterial3: true)
+      });
+    } else {
+      return ThemeData(
+        useMaterial3: false,
         brightness: Brightness.light,
         colorSchemeSeed: Colors.teal,
-    );
+      );
+    }*/
+
   }
 
   static ThemeData get darkMode {
+    if(Util().isMobile) {
+      return ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.teal.shade700,
+            brightness: Brightness.dark
+        )
+      ).copyWith(useMaterial3: true);
+    }
     return ThemeData(
-      useMaterial3: Util().isMobile ? true: false,
+      useMaterial3: false,
       brightness: Brightness.dark,
       colorSchemeSeed: Colors.teal.shade700,
     );
-  }
+  }*/
 }
