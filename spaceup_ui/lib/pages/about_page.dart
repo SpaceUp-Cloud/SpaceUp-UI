@@ -88,7 +88,7 @@ class AboutPage extends State<AboutPageStarter> {
   * Self-Updating JAR
   * ...
 ---
-\u00A9 2022 Gino Atlas <thraax.session@iatlas.technology>
+\u00A9 2022 Gino Atlas <spaceup@iatlas.technology>
 
 For documentations open the [website]($server) of your installed SpaceUp.
 
