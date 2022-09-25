@@ -83,7 +83,7 @@ class DomainPage extends State<DomainPageStarter> {
         opacity: fabIsVisible ? 1 : 0,
         child: addDomainsWidget,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: Stack(
         children: [
           RefreshIndicator(
@@ -116,7 +116,7 @@ class DomainPage extends State<DomainPageStarter> {
                 Expanded(
                     child: ListTile(
                   leading: Icon(Icons.cloud),
-                  title: Text(domain.url),
+                  title: SelectableText(domain.url),
                 )),
                 PopupMenuButton<int>(
                   onSelected: (item) => handleCardAction(item, domain),
@@ -219,11 +219,17 @@ class DomainPage extends State<DomainPageStarter> {
 
   Future<void> _addDomainDialog() async {
     TextEditingController _textFieldController = TextEditingController();
+    /*final double desktopSuggestionWeb = 700;
+    final double mobileSuggestionWeb = 300;
+
+    final double suggestionWidth = Util().isMobile
+        ? mobileSuggestionWeb : desktopSuggestionWeb;*/
 
     return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
           var dialog = AlertDialog(
+            alignment: Alignment.center,
             title: Text("Add your domains"),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0)),
@@ -271,10 +277,7 @@ class DomainPage extends State<DomainPageStarter> {
             ],
           );
 
-          return Padding(
-            padding: EdgeInsets.only(left: 50.0, right: 50.0),
-            child: dialog,
-          );
+          return dialog;
         });
   }
 
@@ -293,7 +296,7 @@ class DomainPage extends State<DomainPageStarter> {
       }
     });
 
-    Util.showMessage(context, "Going to create $domains", durationInSeconds: 5);
+    Util.showMessage(context, "Going to create $domain", durationInSeconds: 5);
 
     try {
       var url = await URL().baseUrl;
