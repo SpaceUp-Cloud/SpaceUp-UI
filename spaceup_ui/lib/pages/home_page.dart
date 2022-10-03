@@ -79,7 +79,6 @@ class _HomePageState extends State<HomePage> {
     final util = Util();
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: theme.primaryColor,
           titleTextStyle: TextStyle(
               color: Colors.white,
               fontSize: 20.0
@@ -182,7 +181,13 @@ class _HomePageState extends State<HomePage> {
           children: [
             getServerVersionBuilder(),
             getHostnameBuilder(),
-            getDiskBuilder()
+            ExpansionTile(
+              title: Text("Disk Usage"),
+              leading: Icon(Icons.align_vertical_bottom),
+              children: [
+                getDiskBuilder()
+              ],
+            )
           ],
         ));
   }
@@ -209,7 +214,7 @@ class _HomePageState extends State<HomePage> {
       children: [
         ListTile(
           leading: Icon(Icons.cloud),
-          title: Text("Hostname: " + hostname),
+          title: SelectableText("Hostname: " + hostname),
         ),
       ],
     ));
@@ -266,6 +271,7 @@ class _HomePageState extends State<HomePage> {
           }
 
           return Card(
+            color: Theme.of(context).colorScheme.primary,
             child: Center(
                 child: CircularProgressIndicator()
             ),
@@ -274,49 +280,56 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget createDiskCard(Disk disk) {
-    final primaryColor = Theme.of(context).textTheme.bodyText1?.color;
-    var max = 1.0;
-    var spaceLeft = 0.0;
+    ThemeData theme = Theme.of(context);
+    final textColor = theme.colorScheme.secondary;
+    var maxSpace = 1.0;
+    var usedSpace = 0.0;
+    var leftSpace = 0.0;
 
     try {
-      max = double.parse(disk.quota.split("M")[0]);
-      spaceLeft = double.parse(disk.space.split("M")[0]);
+      maxSpace = double.parse(disk.quota.split("M")[0]);
+      usedSpace = double.parse(disk.space.split("M")[0]);
+      leftSpace = maxSpace - usedSpace;
     } catch(ex) {
       // NOP
     }
 
     final gauge = SfRadialGauge(
-      title: GaugeTitle(
-        alignment: GaugeAlignment.center,
-        text: 'Disk Usage',
-          textStyle: TextStyle(fontSize: 20.0)
-      ),
       enableLoadingAnimation: true,
       axes: <RadialAxis>[
         RadialAxis(
-            axisLabelStyle: GaugeTextStyle(color: primaryColor),
-            axisLineStyle: AxisLineStyle(color: primaryColor),
-            majorTickStyle: MajorTickStyle(color: primaryColor),
+            axisLabelStyle: GaugeTextStyle(color: textColor),
+            axisLineStyle: AxisLineStyle(color: textColor),
+            majorTickStyle: MajorTickStyle(color: textColor),
             minimum: 0,
-            maximum: max,
+            maximum: maxSpace,
             ranges: <GaugeRange>[
-          GaugeRange(startValue: 0, endValue: max, color: Colors.teal),
-          GaugeRange(startValue: 0, endValue: spaceLeft, color: Colors.deepOrangeAccent,)
+          GaugeRange(startValue: 0, endValue: maxSpace, color: Colors.lightGreen),
+          GaugeRange(startValue: 0, endValue: usedSpace, color: theme.colorScheme.secondary,)
         ],
         pointers: [
           NeedlePointer(
-            value: spaceLeft,
-            needleColor: primaryColor,
-            knobStyle: KnobStyle(color: primaryColor),
-            tailStyle: TailStyle(color: primaryColor),
+            value: usedSpace,
+            needleColor: textColor,
+            knobStyle: KnobStyle(color: textColor),
+            tailStyle: TailStyle(color: textColor),
           )
         ],
         annotations: <GaugeAnnotation>[
           GaugeAnnotation(
             angle: 90,
-            positionFactor: 1.0,
+            positionFactor: 0.5,
+            horizontalAlignment: GaugeAlignment.center,
+            verticalAlignment: GaugeAlignment.center,
             widget: Container(
-              child: Text("${disk.availableQuota}% / ${disk.space} of ${disk.quota}"),
+              child: Text(
+                maxLines: 3,
+                """
+                Left: ${disk.availableQuota}% / ${leftSpace.toInt()}M
+                Used: ${disk.space}
+                Max: ${disk.quota}
+                """
+              )
             )
           )
         ]),
@@ -324,6 +337,7 @@ class _HomePageState extends State<HomePage> {
     );
 
     return Card(
+      semanticContainer: false,
       child: gauge,
     );
   }

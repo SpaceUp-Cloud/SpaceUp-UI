@@ -55,7 +55,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.5
-  dynamic_color: ^1.5.4
+  dynamic_color: #^1.5.4
+    git:
+      url: https://github.com/material-foundation/material-dynamic-color-flutter.git
   material_color_utilities: ^0.1.5
   syncfusion_flutter_gauges: ^20.2.48
 

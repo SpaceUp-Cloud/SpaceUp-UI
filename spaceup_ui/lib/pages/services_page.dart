@@ -110,24 +110,24 @@ class ServicesPage extends State<ServicesPageStarter> {
     if (services.isEmpty) return cards;
 
     services.forEach((service) {
+      var serviceColor = (service.status == "FATAL" || service.status == "STOPPED")
+      ? theme.colorScheme.error : theme.colorScheme.primaryContainer;
+
+      var textColor = (service.status == "FATAL" || service.status == "STOPPED")
+          ? Colors.white : theme.textTheme.bodyMedium?.color;
+
       var card = Card(
           child: Column(children: <Widget>[
         Row(
           children: [
             Expanded(
-              child: Container(
-                height: 75,
-                child: ColoredBox(
-                  color:
-                      (service.status == "FATAL" || service.status == "STOPPED")
-                          ? Colors.deepOrangeAccent
-                          : theme.colorScheme.secondaryContainer,
-                  child: ListTile(
-                    leading: Icon(Icons.miscellaneous_services),
-                    title: Text(service.name),
-                    subtitle: Text(service.info),
-                  ),
-                ),
+              child: ListTile(
+                style: ListTileStyle.list,
+                tileColor: serviceColor,
+                textColor: textColor,
+                leading: Icon(Icons.miscellaneous_services),
+                title: Text(service.name),
+                subtitle: Text(service.info, style: TextStyle(fontWeight: FontWeight.bold),),
               ),
             ),
             PopupMenuButton<int>(
@@ -156,7 +156,10 @@ class ServicesPage extends State<ServicesPageStarter> {
   Future<void> handleCardAction(int item, Service service) async {
     switch (item) {
       case 0:
-        Get.to(() => LogsPageStarter(service.name));
+        Get.to(() => LogsPageStarter(
+            context,
+            service.name,
+        ));
         break;
       case 1:
         _doServiceAction(service.name, "START");

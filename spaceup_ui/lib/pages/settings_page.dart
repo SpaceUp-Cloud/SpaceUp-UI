@@ -13,9 +13,6 @@ class SettingsPageStarter extends StatefulWidget {
 }
 
 class SettingsPage extends State<SettingsPageStarter> {
-  // Add desktop/web specific settings
-  //get desktopAndWebSettings =>
-
   @override
   Widget build(BuildContext context) {
     final Util util = Util();
@@ -51,18 +48,20 @@ class SettingsPage extends State<SettingsPageStarter> {
             'dark': 'Dark mode'
           },
         ),
-        MaterialButton(
-          child: Text('Apply Theme'),
-          onPressed: () {
-            changeTheme(context);
-          },
+        InkWell(
+          child: MaterialButton(
+            child: Text('Apply Theme'),
+            onPressed: () {
+              changeTheme(context);
+            },
+          ),
         )
       ],
     ));
 
     if (util.isMobile) {
       // ... mobile specific
-      submenus.add(SettingsTileGroup(
+      /*submenus.add(SettingsTileGroup(
         title: 'App',
         children: [
           SwitchSettingsTile(
@@ -72,8 +71,9 @@ class SettingsPage extends State<SettingsPageStarter> {
             defaultValue: false,
           ),
         ],
-      ));
+      ));*/
     }
+
     if (util.isWeb) {
       // ... web specific
     }
@@ -83,7 +83,7 @@ class SettingsPage extends State<SettingsPageStarter> {
     }*/
 
     // Das not work yet on desktop (except Linux) but web
-    if (isPartlyDesktop || util.isWeb || util.isMobile) {
+    if (/*isPartlyDesktop*/ util.isDesktop || util.isWeb || util.isMobile) {
       submenus.add(SettingsTileGroup(
         title: 'Behaviour',
         children: [
@@ -97,9 +97,7 @@ class SettingsPage extends State<SettingsPageStarter> {
     }
 
     if (util.isDesktop && !isPartlyDesktop && !util.isWeb) {
-      submenus.add(SettingsContainer(
-        child: Text("Does not work yet on this desktop."),
-      ));
+      // Does not work yet on this desktop
     }
 
     // ... for all platforms

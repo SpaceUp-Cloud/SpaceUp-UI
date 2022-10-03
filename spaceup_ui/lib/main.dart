@@ -2,7 +2,6 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:material_color_utilities/palettes/core_palette.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:spaceup_ui/pages/about_page.dart';
 import 'package:spaceup_ui/pages/domain_page.dart';
@@ -35,40 +34,40 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Default color
-    Color primaryColor = Colors.teal;
-    Color secondaryColor = Colors.teal.shade700;
+    var lightScheme;// = ColorScheme.fromSeed(seedColor: Colors.teal);
+    var darkScheme;// = ColorScheme.fromSeed(seedColor: Colors.teal.shade800, brightness: Brightness.dark);
 
-    return FutureBuilder<CorePalette?>(
-      future: DynamicColorPlugin.getCorePalette(),
-      builder: (context, snapshot) {
-        if(snapshot.connectionState == ConnectionState.done) {
-          int? primaryColorValue = snapshot.data?.primary.get(40);
-          int? secondaryColorValue = snapshot.data?.secondary.get(40);
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        lightScheme = lightDynamic!.harmonized();
+        darkScheme = darkDynamic!.harmonized()
+            .copyWith(brightness: Brightness.dark);
 
-          if(primaryColorValue != null) {
-            primaryColor = Color(primaryColorValue).harmonizeWith(Colors.teal);
-          }
-          if(secondaryColorValue != null) {
-            secondaryColor = Color(secondaryColorValue);
-          }
-        }
-        print("Primary color: ${primaryColor}");
         return AnimatedSwitcher(
           duration: Duration(milliseconds: 600),
           child: AdaptiveTheme(
-            initial: savedThemeMode ?? AdaptiveThemeMode.system,
+            initial: AdaptiveThemeMode.system,
             light: ThemeData(
                 appBarTheme: AppBarTheme(
                     titleTextStyle: TextStyle(
-                        color: Colors.white
-                    )
+                        color: Colors.white,
+                        fontSize: 20
+                    ),
                 ),
-                colorSchemeSeed: primaryColor,
+                colorScheme: lightScheme,
+                primaryColor: lightScheme.primary,
                 useMaterial3: true
             ),
             dark: ThemeData(
-                colorSchemeSeed: primaryColor,
+                appBarTheme: AppBarTheme(
+                  titleTextStyle: TextStyle(
+                      color: Colors.black12,
+                      fontSize: 20
+                  ),
+                ),
+                colorScheme: darkScheme,
+                primaryColor: darkScheme.primary,
+                brightness: Brightness.dark,
                 useMaterial3: true
             ),
             builder: (theme, darkTheme) {

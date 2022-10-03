@@ -9,8 +9,9 @@ import 'package:spaceup_ui/ui_data.dart';
 import 'package:spaceup_ui/util.dart';
 
 class LogsPageStarter extends StatefulWidget {
-  LogsPageStarter(this.servicename) : super();
+  LogsPageStarter(this.context, this.servicename) : super();
 
+  final BuildContext context;
   final String servicename;
 
   @override
@@ -34,10 +35,12 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
   ];
 
   // TabColor
-  late Color tabcolor = Colors.teal;
+  late Color tabcolor = Theme.of(context).colorScheme.primary;
+  late Color primary = Theme.of(context).colorScheme.primary;
+  late Color error = Colors.redAccent;
 
   /// default filters
-  var limit = 500;
+  var limit = 5000;
   var reversed = true;
 
   // TODO: use enum instead
@@ -53,14 +56,13 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
     tabController.addListener(() {
       setState(() {
         tabcolor = tabController.index == 0
-            ? Colors.teal
-            : Colors.deepOrange;
+            ? primary : error;
       });
     });
 
     scrollController.addListener(() {
       setState(() {
-        if (scrollController.offset >= 100) {
+        if (scrollController.offset >= 50) {
           _showBackToTopButton = true; // show the back-to-top button
         } else {
           _showBackToTopButton = false; // hide the back-to-top button
@@ -78,6 +80,7 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context).colorScheme;
     var body = NestedScrollView(
       /*physics: AlwaysScrollableScrollPhysics(),
           controller: scrollController,*/
@@ -86,9 +89,10 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
           // Add here Filter component
           SliverToBoxAdapter(
             child: TabBar(
-                labelColor: Theme.of(context).textTheme.bodyText1?.color,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.grey,
                 indicatorColor: Color.fromRGBO(4, 2, 46, 1),
-                labelPadding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                labelPadding: EdgeInsets.fromLTRB(0, 2, 0, 2),
                 indicator: BoxDecoration(
                     color: tabcolor),
                 controller: tabController,
@@ -101,10 +105,9 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
       }, body: _getLogsBuilder(),
     );
 
-    ThemeData theme = Theme.of(context);
     var scaffold = Scaffold(
       appBar: AppBar(
-        backgroundColor: theme.primaryColor,
+        backgroundColor: theme.primary,
         titleTextStyle: TextStyle(
             color: Colors.white,
             fontSize: 20.0
@@ -112,7 +115,15 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
         flexibleSpace: SUGradient.gradientContainer,
         title: Text("${widget.servicename} Logs"),
       ),
-      body: body,
+      body: Stack(
+        children: [
+          RefreshIndicator(
+              child: body,
+              onRefresh: _refreshLogs,
+              key: refreshKey
+          )
+        ],
+      ),
       floatingActionButton: _showBackToTopButton == false
           ? null
           : FloatingActionButton(
@@ -137,7 +148,7 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
           } else if (!snapshot.hasData && snapshot.data == null) {
             return Center(
               child: Text(
-                  'No logs found. Service log path is correctly configured?'),
+                  'Loading logs.'),
             );
           } else if (snapshot.hasError) {
             return Center(
@@ -152,14 +163,12 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
   }
 
   Widget _buildLogView(List<String> infoLogs, List<String> errorLogs) {
-    var logTabContent = <Widget>[];
-    var logs = <Widget>[];
-
+    var logTabContent = <CustomScrollView>[];
     // Info log
-    if (infoLogs.isNotEmpty) {
+    /*if (infoLogs.isNotEmpty) {
       infoLogs.forEach((log) {
         logs.add(
-          Text(log),
+          SelectableText(log),
         );
       });
     }
@@ -169,31 +178,72 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
       shrinkWrap: true,
       children: logs,
       controller: scrollController,
-    ));
+    ));*/
+    /*var infoListView = ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        //shrinkWrap: true,
+        controller: scrollController,
+        itemCount: infoLogs.length,
+        itemBuilder: (context, index) {
+          return SelectableText(infoLogs[index]);
+        });*/
+    var infoCustomSrollView = CustomScrollView(
+      shrinkWrap: true,
+      physics: const BouncingScrollPhysics(),
+      controller: scrollController,
+      slivers: [
+        SliverPrototypeExtentList(
+            delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  return SelectableText(infoLogs[index].split("/n")[0], style: TextStyle(
+                      fontSize: 14.0
+                  ), maxLines: 3,);
+                }, childCount: infoLogs.length,
+              semanticIndexOffset: 20,
+            ), prototypeItem: SelectableText(infoLogs[1])
+        )
+      ],
+    );
+    logTabContent.add(infoCustomSrollView);
+
+    var errorCustomSrollView = CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      controller: scrollController,
+      slivers: [
+        SliverPrototypeExtentList(
+          delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                return SelectableText(errorLogs[index]);
+              }, childCount: errorLogs.length,
+          ), prototypeItem: SelectableText(errorLogs[100]))
+      ],
+    );
+    logTabContent.add(errorCustomSrollView);
 
     // error log
-    var errors = <Widget>[];
+    /*var errors = <Widget>[];
     if (errorLogs.isNotEmpty) {
       errorLogs.forEach((log) {
         errors.add(
-          Text(log),
+          SelectableText(log),
         );
       });
-    }
+    }*/
 
-    logTabContent.add(ListView(
+    /*logTabContent.add(ListView(
       physics: const ClampingScrollPhysics(),
       shrinkWrap: true,
       children: errors,
       controller: scrollController,
-    ));
+    ));*/
 
     return TabBarView(controller: tabController, children: logTabContent);
   }
 
   void _scrollToTop() {
-    scrollController.animateTo(0,
-        duration: Duration(seconds: 1), curve: Curves.fastLinearToSlowEaseIn);
+    /*scrollController.animateTo(0,
+        duration: Duration(seconds: 1), curve: Curves.fastLinearToSlowEaseIn);*/
+    scrollController.jumpTo(0);
   }
 
   Future<Logs> _getLogs(String servicename) async {
@@ -222,6 +272,12 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
 
     return logs;
   }
+
+  Future<void> _refreshLogs() async {
+    setState(() {
+      logs = _getLogs(widget.servicename);
+    });
+  }
 }
 
 class Logs {
@@ -240,9 +296,7 @@ Logs _logsFromJson(Map<String, dynamic> json) {
   List<String> cleanedInfo = [];
   List<String> cleanedError = [];
 
-  print("info log: $info");
   if (info.isNotEmpty) {
-    print("info log is not empty");
     info.forEach((element) {
       var trimmed = element.trim();
       cleanedInfo.add(trimmed);
@@ -250,7 +304,6 @@ Logs _logsFromJson(Map<String, dynamic> json) {
   }
 
   if (error.isNotEmpty) {
-    print("info log is not empty");
     error.forEach((element) {
       var trimmed = element.trim();
       cleanedError.add(trimmed);
