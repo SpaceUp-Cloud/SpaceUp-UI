@@ -125,6 +125,12 @@ class _HomePageState extends State<HomePage> {
                   Get.toNamed(UIData.webbackendsRoute);
                 },
               ),
+              ListTile(
+                title: Text("Server Web Scripts"),
+                onTap: () {
+                  Get.toNamed(UIData.swsRoute);
+                },
+              ),
               Divider(
                 height: 1.0,
               ),

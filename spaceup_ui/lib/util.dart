@@ -45,6 +45,15 @@ class Util {
       if(feedback != null && feedback["error"] != null) {
         snackBar = SnackBar(content: Text(feedback["error"]!),);
       }
+
+      try {
+        final embeddedError = feedback["_embedded"]["errors"][0]["message"];
+        if(feedback != null && embeddedError != null) {
+          snackBar = SnackBar(content: Text(embeddedError),);
+        }
+      } catch(ex) {
+        // NOP
+      }
     }
 
     if(snackBar != null) {

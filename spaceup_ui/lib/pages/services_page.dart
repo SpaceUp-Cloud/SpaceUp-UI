@@ -100,7 +100,7 @@ class ServicesPage extends State<ServicesPageStarter> {
 
           // By default, show a loading spinner.
           return Center(
-            child: LinearProgressIndicator(),
+            child: CircularProgressIndicator(),
           );
         });
   }

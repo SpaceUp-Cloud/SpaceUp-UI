@@ -1,8 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flutter/material.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
-import 'package:spaceup_ui/util.dart';
 
 class UIData {
   static const String domainsRoute = "/domains";
@@ -11,6 +9,7 @@ class UIData {
   static const String webbackendsRoute = "/webbackends";
   static const String homeRoute = "/home";
   static const String aboutRoute = "/about";
+  static const String swsRoute = "/sws";
   static const String loginRoute = "/";
 }
 

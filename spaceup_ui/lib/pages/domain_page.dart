@@ -179,7 +179,7 @@ class DomainPage extends State<DomainPageStarter> {
 
           // By default, show a loading spinner.
           return Center(
-            child: LinearProgressIndicator(),
+            child: CircularProgressIndicator(),
           );
         });
   }
