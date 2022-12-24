@@ -120,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               ListTile(
-                title: Text("Webbackends"),
+                title: Text("Web backends"),
                 onTap: () {
                   Get.toNamed(UIData.webbackendsRoute);
                 },
