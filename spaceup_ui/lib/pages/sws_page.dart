@@ -18,13 +18,13 @@ class SwsPageStarter extends StatefulWidget {
 }
 
 class SwsPage extends State<SwsPageStarter> {
+  late ThemeData theme;
+
   ScrollController scrollController = ScrollController();
   var refreshKey = GlobalKey<RefreshIndicatorState>();
   bool _showBackToTopButton = false;
 
   Map<String, TextEditingController> textControllers = {};
-
-  late ThemeData theme;
   late Future<List<Sws>> _sws;
 
   @override
@@ -55,14 +55,6 @@ class SwsPage extends State<SwsPageStarter> {
   Widget build(BuildContext context) {
     theme = Theme.of(context);
 
-    final swsView = SingleChildScrollView(
-      physics: AlwaysScrollableScrollPhysics(),
-      controller: scrollController,
-      child: Container(
-        child: createSwsCards(),
-      ),
-    );
-
     final scaffold = Scaffold(
       appBar: AppBar(
         backgroundColor: theme.colorScheme.primary,
@@ -72,16 +64,18 @@ class SwsPage extends State<SwsPageStarter> {
         ),
         flexibleSpace: SUGradient.gradientContainer,
         title: Text("Server Web Scripts"),
-      ),
-      body: Stack(
-        children: [
-          RefreshIndicator(
-              child: createSwsCards(),
-              onRefresh: _onRefresh,
-              key: refreshKey,
+        actions: [
+          IconButton(
+              onPressed: _onRefresh,
+              icon: Icon(Icons.refresh)
+          ),
+          IconButton(
+              onPressed: () {}, //_addSws,
+              icon: Icon(Icons.add)
           )
         ],
       ),
+      body: createSwsCards(),
       floatingActionButton: _showBackToTopButton == false
           ? null
           : FloatingActionButton(
@@ -102,6 +96,11 @@ class SwsPage extends State<SwsPageStarter> {
   Future<void> _onRefresh() async {
     setState(() {
       _sws = _loadSws();
+      _sws.then((swsList) => {
+        swsList.forEach((sws) {
+          textControllers.update(sws.name, (value) => TextEditingController(text: sws.content));
+        })
+      });
     });
   }
 
@@ -135,42 +134,43 @@ class SwsPage extends State<SwsPageStarter> {
       var header = SliverStickyHeader(
         overlapsContent: false,
         header: Container(
-          color: theme.colorScheme.primaryContainer,
+          color: theme.colorScheme.secondaryContainer,
           child: Column(
             children: [
               ListTile(
                 leading: Icon(Icons.extension),
                 style: ListTileStyle.list,
-                visualDensity: VisualDensity.comfortable,
+                visualDensity: VisualDensity.compact,
                 title: Text(sws.name),
+                subtitle: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    MaterialButton(
+                      child: Text("Save"),
+                      onPressed: () {
+                        _saveSws(textControllers[sws.name]!.value.text);
+                      },
+                    ),
+                    MaterialButton(
+                      child: Text("Delete", style: TextStyle(
+                          color: theme.colorScheme.error
+                      )),
+                      onPressed: () {
+                        // TODO Show popup and warn be deleting
+                      },
+                    ),
+                    MaterialButton(
+                      child: Text("Execute"),
+                      onPressed: () {
+                        print("Execute ${sws.name}");
+                        // TODO
+                        _showExecutionDialog(sws.name, sws.content);
+                      },
+                    ),
+                  ],
+                ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  MaterialButton(
-                    child: Text("Save"),
-                    onPressed: () {
-                      _saveSws(textControllers[sws.name]!.value.text);
-                    },
-                  ),
-                  MaterialButton(
-                    child: Text("Delete", style: TextStyle(
-                        color: theme.colorScheme.error
-                    )),
-                    onPressed: () {
-                      // TODO Show popup and warn be deleting
-                    },
-                  ),
-                  MaterialButton(
-                    child: Text("Execute"),
-                    onPressed: () {
-                      print("Execute ${sws.name}");
-                      // TODO
-                      _showExecutionDialog(sws.content);
-                    },
-                  ),
-                ],
-              ),
+
             ],
           )
         ),
@@ -202,18 +202,27 @@ class SwsPage extends State<SwsPageStarter> {
     return cards;
   }
 
-  Future<void> _showExecutionDialog(String swsContent) {
+  Future<void> _showExecutionDialog(String swsName, String swsContent) {
     // Get a list of params, which we can wrap in a TextField list
     final paramTextFields = <TextField>[];
+    final regex =
+    RegExp(r"SERVER_ENDPOINT:\s*([a-zA-Z]+)\s*(/{0,1}[a-zA-Z]+/{0,1})+\?")
+        .firstMatch(swsContent);
+    final String? httpMethod = regex?[1];
+    print("Found http method: $httpMethod");
+    // SWS URI
+    final String? swsUri = regex?[2];
+    print("SWS uri: $swsUri");
+
     // ...?myparam=defaultValue&anotherParam ...
     // myparam=defaultValue,anotherParam
-    final listParamPairs = RegExp(r"([^&?]+?)=([^&?]+)?", multiLine: false)
+    final listParamPairs = RegExp(r"([^&?]+?)=?([^&?]+)?", multiLine: false)
         .allMatches(swsContent);
     listParamPairs.forEach((matchGroup) {
       var match = matchGroup[0];
       // length check is a workaround as the regex isn't perfect
+      TextEditingController textController = TextEditingController();
       if(match != null && match.contains("=")) {
-        TextEditingController textController = TextEditingController();
         String key = match.split("=")[0];
         String value = match.split("=")[1].split("\n")[0];
         textController.text = value;
@@ -225,24 +234,55 @@ class SwsPage extends State<SwsPageStarter> {
             ),
           )
         );
+      } else if(match != null && match.length < 40) {
+        textController.text = "";
+        paramTextFields.add(
+            TextField(
+              controller: textController,
+              decoration: InputDecoration(
+                  labelText: match.split("\n")[0]
+              ),
+            )
+        );
       }
     });
 
     return showDialog(
         context: context,
         builder: (BuildContext context) {
-          return Dialog(
-            child: Container(
+          return AlertDialog(
+            content: Container(
               child: Form(
                 child: Column(
+                  //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   mainAxisSize: MainAxisSize.min,
-                  children: paramTextFields,
+                  children: [
+                    Text("SWS Input data", style: TextStyle(
+                      fontWeight: FontWeight.bold
+                    )),
+                    Column(
+                      children: paramTextFields,
+                    ),
+                    Padding(padding: EdgeInsets.fromLTRB(0.0, 10, 0.0, 10)),
+                    MaterialButton(
+                        child: Text("Execute $swsName"),
+                        onPressed: () {} //_swsExecute(httpMethod, swsUrl, paramTextFields)
+                    )
+                  ],
                 ),
               ),
             )
           );
         }
     );
+  }
+
+  Future<void> _swsExecute(
+      String httpMethod, String swsUrl, List<TextField> textfields) async {
+
+    print("Http-Method: $httpMethod");
+    print("SWS-URL: $swsUrl");
+    //print("Http-Params: $httpParams");
   }
 
   Future<void> _saveSws(String content) async {
@@ -259,12 +299,12 @@ class SwsPage extends State<SwsPageStarter> {
             body: content,
             headers: jwt);
       if(response.statusCode == 200) {
+        print("Updated sws");
         Util.showFeedback(context, response.body);
         setState(() {
           _sws = _loadSws();
         });
       } else {
-        print(response.body);
         if(response.body.isNotEmpty) {
           Util.showFeedback(context, response.body);
         }
