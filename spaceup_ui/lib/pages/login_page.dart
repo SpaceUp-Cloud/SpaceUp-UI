@@ -533,6 +533,7 @@ class _LoginState extends State<LoginPage> {
   }
 
   ListView _loginForm() {
+    titleText.value = "Login";
     return ListView(
       children: [
         Container(
