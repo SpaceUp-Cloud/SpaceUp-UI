@@ -20,6 +20,7 @@ class LogsPageStarter extends StatefulWidget {
 
 class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixin  {
   ScrollController scrollController = ScrollController();
+  ScrollController scrollControllerError = ScrollController();
   late TabController tabController =
       TabController(initialIndex: 0, length: 2, vsync: this);
   var refreshKey = GlobalKey<RefreshIndicatorState>();
@@ -30,8 +31,8 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
 
   // Tabs
   var tabs = [
-    Tab(text: 'Info', height: 30,),
-    Tab(text: 'Error', height: 30,),
+    Tab(text: 'Info', height: 35,),
+    Tab(text: 'Error', height: 35,),
   ];
 
   // TabColor
@@ -69,11 +70,22 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
         }
       });
     });
+
+    scrollControllerError.addListener(() {
+      setState(() {
+        if (scrollController.offset >= 50) {
+          _showBackToTopButton = true; // show the back-to-top button
+        } else {
+          _showBackToTopButton = false; // hide the back-to-top button
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     scrollController.dispose();
+    scrollControllerError.dispose();
     tabController.dispose();
     super.dispose();
   }
@@ -138,7 +150,6 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
   FutureBuilder<Logs> _getLogsBuilder() {
     return FutureBuilder<Logs>(
         future: logs,
-        initialData: null,
         builder: (context, AsyncSnapshot<Logs> snapshot) {
           if (snapshot.hasData && snapshot.data != null) {
             var infoLogs = snapshot.data!.info;
@@ -147,8 +158,7 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
             return _buildLogView(infoLogs, errorLogs);
           } else if (!snapshot.hasData && snapshot.data == null) {
             return Center(
-              child: Text(
-                  'Loading logs.'),
+              child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasError) {
             return Center(
@@ -163,44 +173,23 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
   }
 
   Widget _buildLogView(List<String> infoLogs, List<String> errorLogs) {
-    var logTabContent = <CustomScrollView>[];
-    // Info log
-    /*if (infoLogs.isNotEmpty) {
-      infoLogs.forEach((log) {
-        logs.add(
-          SelectableText(log),
-        );
-      });
-    }
+    final logTabContent = <CustomScrollView>[];
 
-    logTabContent.add(ListView(
-      physics: const ClampingScrollPhysics(),
-      shrinkWrap: true,
-      children: logs,
-      controller: scrollController,
-    ));*/
-    /*var infoListView = ListView.builder(
-        physics: const BouncingScrollPhysics(),
-        //shrinkWrap: true,
-        controller: scrollController,
-        itemCount: infoLogs.length,
-        itemBuilder: (context, index) {
-          return SelectableText(infoLogs[index]);
-        });*/
     var infoCustomSrollView = CustomScrollView(
-      shrinkWrap: true,
+      //shrinkWrap: true,
       physics: const BouncingScrollPhysics(),
       controller: scrollController,
       slivers: [
-        SliverPrototypeExtentList(
+        SliverList(
             delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  return SelectableText(infoLogs[index].split("/n")[0], style: TextStyle(
-                      fontSize: 14.0
-                  ), maxLines: 3,);
+                  return SelectableText(infoLogs[index],
+                      style: TextStyle(
+                          fontSize: 14.0
+                      )
+                  );
                 }, childCount: infoLogs.length,
-              semanticIndexOffset: 20,
-            ), prototypeItem: SelectableText(infoLogs[1])
+            )
         )
       ],
     );
@@ -208,14 +197,19 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
 
     var errorCustomSrollView = CustomScrollView(
       physics: const BouncingScrollPhysics(),
-      controller: scrollController,
+      controller: scrollControllerError,
       slivers: [
-        SliverPrototypeExtentList(
-          delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                return SelectableText(errorLogs[index]);
-              }, childCount: errorLogs.length,
-          ), prototypeItem: SelectableText(errorLogs[100]))
+        SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                return SelectableText(errorLogs[index],
+                    style: TextStyle(
+                        fontSize: 14.0
+                    )
+                );
+              },
+              childCount: errorLogs.length,
+            ))
       ],
     );
     logTabContent.add(errorCustomSrollView);
@@ -244,6 +238,7 @@ class LogsPage extends State<LogsPageStarter> with SingleTickerProviderStateMixi
     /*scrollController.animateTo(0,
         duration: Duration(seconds: 1), curve: Curves.fastLinearToSlowEaseIn);*/
     scrollController.jumpTo(0);
+    scrollControllerError.jumpTo(0);
   }
 
   Future<Logs> _getLogs(String servicename) async {
