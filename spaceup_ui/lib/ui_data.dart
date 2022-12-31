@@ -15,11 +15,12 @@ class UIData {
 
 class URL {
   // http://192.168.178.24:9090/api
-  Future<String> get baseUrl async {
-    String baseApiUrl = "/api";
+  String baseApiUrl = "";
 
-    baseApiUrl = (await Settings().getString("server", ""))! + baseApiUrl;
-    print("BaseApiUrl: $baseApiUrl");
+  Future<String> get baseUrl async {
+    if(baseApiUrl.isEmpty) {
+      baseApiUrl = await serverUrl + "/api";
+    }
     return baseApiUrl;
   }
 
