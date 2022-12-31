@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.25.0
+version: 0.26.0
 
 environment:
   sdk: '>=2.18.0 <3.3.0'
@@ -39,8 +39,8 @@ dependencies:
     git:
       url: https://github.com/BarthaBRW/shared_preferences_settings
 
-  url_launcher: ^6.1.5
-  flutter_markdown: ^0.6.10+5
+  url_launcher: ^6.1.7
+  flutter_markdown: ^0.6.13
   # Maybe
   # settings_ui: ^1.0.0
 
@@ -60,12 +60,12 @@ dependencies:
     git:
       url: https://github.com/material-foundation/material-dynamic-color-flutter.git
   material_color_utilities: ^0.1.5
-  syncfusion_flutter_gauges: ^20.2.48
+  syncfusion_flutter_gauges: ^20.4.38
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.10.0
+  flutter_launcher_icons: ^0.11.0
 
 flutter_icons:
   android: "launcher_icon"
