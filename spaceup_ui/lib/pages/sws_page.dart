@@ -25,6 +25,7 @@ class SwsPage extends State<SwsPageStarter> {
   bool _showBackToTopButton = false;
 
   Map<String, TextEditingController> textControllers = {};
+  Map<String, String> keyValueMap = {};
   late Future<List<Sws>> _sws;
 
   @override
@@ -205,46 +206,52 @@ class SwsPage extends State<SwsPageStarter> {
   Future<void> _showExecutionDialog(String swsName, String swsContent) {
     // Get a list of params, which we can wrap in a TextField list
     final paramTextFields = <TextField>[];
-    final regex =
-    RegExp(r"SERVER_ENDPOINT:\s*([a-zA-Z]+)\s*(/{0,1}[a-zA-Z]+/{0,1})+\?")
-        .firstMatch(swsContent);
-    final String? httpMethod = regex?[1];
-    print("Found http method: $httpMethod");
-    // SWS URI
-    final String? swsUri = regex?[2];
-    print("SWS uri: $swsUri");
 
-    // ...?myparam=defaultValue&anotherParam ...
-    // myparam=defaultValue,anotherParam
-    final listParamPairs = RegExp(r"([^&?]+?)=?([^&?]+)?", multiLine: false)
-        .allMatches(swsContent);
-    listParamPairs.forEach((matchGroup) {
-      var match = matchGroup[0];
+    // Base regex for sws SERVER_ENDPOINT
+    // TODO does not work fully yet
+    final regex = RegExp(r"SERVER_ENDPOINT:\s*([a-zA-Z]+)\s*(/?[^\s])+")
+        .firstMatch(swsContent);
+
+    // uri will be used to HTTP call
+    final uri = regex![0]!.split("?")[0].split(" ")[2];
+    // uri params are necessary to generate text fields and map the value
+    final uriParams = Uri.decodeComponent(regex[0]!.split("?")[1]).split("&");
+    print("URI Params: $uriParams");
+    // http method is used to determine how to call the REST API
+    final String? httpMethod = regex[1];
+
+    // Clear map to map values new from text field
+    keyValueMap.clear();
+
+    uriParams.forEach((params) {
       // length check is a workaround as the regex isn't perfect
       TextEditingController textController = TextEditingController();
-      if(match != null && match.contains("=")) {
-        String key = match.split("=")[0];
-        String value = match.split("=")[1].split("\n")[0];
+
+      // Assign param as default
+      String key = params;
+
+      // Map the text field value to the key for http params
+      textController.addListener(() {
+        keyValueMap[key] = textController.text;
+      });
+
+      if(params.contains("=")) {
+        // Check if sws http param is a key value pair and assign as key
+        // ... and default value
+        key = params.split("=")[0];
+        String value = params.split("=")[1];
         textController.text = value;
-        paramTextFields.add(
+      }
+
+      // Add text field for each http param key
+      paramTextFields.add(
           TextField(
             controller: textController,
             decoration: InputDecoration(
-              labelText: key
+                labelText: key
             ),
           )
-        );
-      } else if(match != null && match.length < 40) {
-        textController.text = "";
-        paramTextFields.add(
-            TextField(
-              controller: textController,
-              decoration: InputDecoration(
-                  labelText: match.split("\n")[0]
-              ),
-            )
-        );
-      }
+      );
     });
 
     return showDialog(
@@ -254,7 +261,6 @@ class SwsPage extends State<SwsPageStarter> {
             content: Container(
               child: Form(
                 child: Column(
-                  //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text("SWS Input data", style: TextStyle(
@@ -266,7 +272,10 @@ class SwsPage extends State<SwsPageStarter> {
                     Padding(padding: EdgeInsets.fromLTRB(0.0, 10, 0.0, 10)),
                     MaterialButton(
                         child: Text("Execute $swsName"),
-                        onPressed: () {} //_swsExecute(httpMethod, swsUrl, paramTextFields)
+                        onPressed: () {
+                          _swsExecute(httpMethod!, swsName,
+                              uri, keyValueMap);
+                        }
                     )
                   ],
                 ),
@@ -278,11 +287,95 @@ class SwsPage extends State<SwsPageStarter> {
   }
 
   Future<void> _swsExecute(
-      String httpMethod, String swsUrl, List<TextField> textfields) async {
+      String httpMethod, String swsName,
+      String swsUrl, Map<String, String> keyValueMap) async {
 
     print("Http-Method: $httpMethod");
     print("SWS-URL: $swsUrl");
-    //print("Http-Params: $httpParams");
+    print("Http-Params: $keyValueMap");
+
+    // Remap key value data to url http parameters
+    String httpParamString = "";
+    keyValueMap.forEach((key, value) {
+      if(httpParamString.isEmpty) {
+        httpParamString += "$key=$value";
+      } else {
+        httpParamString += "&$key=$value";
+      }
+    });
+
+    // Build sws execution url
+    final baseSwsApiUrl = swsUrl.startsWith("/")
+        ? "/sws/exec/$swsName$swsUrl?$httpParamString"
+        : "/sws/exec/$swsName/$swsUrl?$httpParamString";
+    print("SWS Execution URL: $baseSwsApiUrl");
+
+    final httpClient = http.Client();
+    final client = RetryClient(httpClient);
+
+    try {
+      final url = await URL().baseUrl + baseSwsApiUrl;
+      final jwt = await Util().getJWT();
+      jwt["Content-Type"] = "text/plain";
+
+      final response = await _swsHttpExecute(url, httpMethod, client, jwt);
+      if(response.statusCode == 200) {
+        Util.showFeedback(context, response.body, durationInSeconds: 15);
+      } else {
+        if(response.body.isNotEmpty) {
+          Util.showFeedback(context, response.body, durationInSeconds: 15);
+        }
+      }
+
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<http.Response> _swsHttpExecute(
+      String url, String httpMethod,
+      RetryClient client, Map<String, String> jwt) async {
+    switch(httpMethod.toLowerCase()) {
+      case "get": {
+        return await client.get(
+            Uri.tryParse(url)!,
+            headers: jwt
+        );
+      }
+      case "post": {
+        return await client.post(
+            Uri.tryParse(url)!,
+            headers: jwt
+        );
+      }
+      case "delete": {
+        return await client.delete(
+            Uri.tryParse(url)!,
+            headers: jwt
+        );
+      }
+      case "put": {
+        return await client.put(
+            Uri.tryParse(url)!,
+            headers: jwt
+        );
+      }
+      case "patch": {
+        return await client.patch(
+            Uri.tryParse(url)!,
+            headers: jwt
+        );
+      }
+      case "head": {
+        return await client.head(
+            Uri.tryParse(url)!,
+            headers: jwt
+        );
+      }
+      default: {
+        return http.Response("Unknown HTTP Method", 500);
+      }
+    }
   }
 
   Future<void> _saveSws(String content) async {
