@@ -16,7 +16,10 @@ class Util {
   bool get isMobile => (Platform.isIOS || Platform.isAndroid);
   bool get isWeb => kIsWeb ? true : false;
 
-  static void showFeedback(BuildContext context, String msg) {
+  static void showFeedback(BuildContext context,
+      String msg, {int durationInSeconds = 5}) {
+    final theme = Theme.of(context);
+
     print(msg);
     var feedback;
     var snackBar;
@@ -30,26 +33,36 @@ class Util {
     if(feedback is List) {
       for(var f in feedback) {
         if(f != null && f["info"] != null) {
-          snackBar = SnackBar(content: Text(f["info"]!),);
+          snackBar = SnackBar(content: Text(f["info"]!),
+            duration: Duration(seconds: durationInSeconds),
+          );
         }
 
         if(f != null && f["error"] != null) {
-          snackBar = SnackBar(content: Text(f["error"]!),);
+          snackBar = SnackBar(content: Text(f["error"]!),
+            duration: Duration(seconds: durationInSeconds),
+            backgroundColor: theme.errorColor,);
         }
       }
     } else {
       if(feedback != null && feedback["info"] != null) {
-        snackBar = SnackBar(content: Text(feedback["info"]!),);
+        snackBar = SnackBar(content: Text(feedback["info"]!),
+          duration: Duration(seconds: durationInSeconds),
+        );
       }
 
       if(feedback != null && feedback["error"] != null) {
-        snackBar = SnackBar(content: Text(feedback["error"]!),);
+        snackBar = SnackBar(content: Text(feedback["error"]!),
+          duration: Duration(seconds: durationInSeconds),
+          backgroundColor: theme.errorColor,);
       }
 
       try {
         final embeddedError = feedback["_embedded"]["errors"][0]["message"];
         if(feedback != null && embeddedError != null) {
-          snackBar = SnackBar(content: Text(embeddedError),);
+          snackBar = SnackBar(content: Text(embeddedError),
+            backgroundColor: theme.errorColor,
+            duration: Duration(seconds: durationInSeconds),);
         }
       } catch(ex) {
         // NOP
@@ -57,7 +70,9 @@ class Util {
     }
 
     if(snackBar != null) {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      var state = ScaffoldMessenger.of(context);
+      state.clearSnackBars();
+      state.showSnackBar(snackBar);
     }
   }
 
