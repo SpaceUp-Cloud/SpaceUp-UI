@@ -60,7 +60,7 @@ dependencies:
     git:
       url: https://github.com/material-foundation/material-dynamic-color-flutter.git
   material_color_utilities: ^0.1.5
-  syncfusion_flutter_gauges: ^20.4.38
+  syncfusion_flutter_gauges: ^21.0.0
 
 dev_dependencies:
   flutter_test:
