@@ -28,7 +28,7 @@ dependencies:
   flip_card: ^0.7.0
   flutter_sticky_header: ^0.6.4
   #local_auth: ^1.1.5
-  http: ^0.13.5
+  http: ^1.0.0
   jwt_decoder: ^2.0.1
   page_transition: ^2.0.9
   universal_io: ^2.0.4
